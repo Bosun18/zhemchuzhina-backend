@@ -21,6 +21,10 @@ class RoomTypesTable
                     ->label('Макс. гостей')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('rooms_count')
+                    ->label('Номеров')
+                    ->counts('rooms')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Создан')
                     ->dateTime()

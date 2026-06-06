@@ -26,6 +26,8 @@ class RoomTypeResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Типы номеров';
 
+    protected static ?int $navigationSort = 1;
+
     public static function form(Schema $schema): Schema
     {
         return RoomTypeForm::configure($schema);

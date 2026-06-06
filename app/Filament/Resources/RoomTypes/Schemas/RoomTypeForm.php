@@ -21,7 +21,8 @@ class RoomTypeForm
                 TextInput::make('max_guests')
                     ->label('Макс. гостей')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->minValue(1),
             ]);
     }
 }
