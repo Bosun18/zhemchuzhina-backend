@@ -65,22 +65,27 @@
 
 <div class="p-2">
     @if ($description === 'updated' && ! empty($new))
-        <table class="w-full text-sm border-collapse">
+        <table class="w-full text-sm border-collapse table-fixed">
+            <colgroup>
+                <col style="width: 28%">
+                <col style="width: 36%">
+                <col style="width: 36%">
+            </colgroup>
             <thead>
                 <tr class="border-b border-gray-200 dark:border-gray-700">
-                    <th class="w-1/4 py-2 px-4 text-left font-medium text-gray-500">Поле</th>
-                    <th class="w-[37.5%] py-2 px-4 text-left font-medium text-red-500">Было</th>
-                    <th class="w-[37.5%] py-2 px-4 text-left font-medium text-green-500">Стало</th>
+                    <th class="py-2 px-4 text-left font-medium text-gray-500">Поле</th>
+                    <th class="py-2 px-4 text-left font-medium text-red-500">Было</th>
+                    <th class="py-2 px-4 text-left font-medium text-green-500">Стало</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($new as $key => $value)
                     <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="py-2 px-4 text-xs text-gray-500">{{ $fieldLabels[$key] ?? $key }}</td>
-                        <td class="py-2 px-4 text-red-600 dark:text-red-400">
+                        <td class="py-2 px-4 text-xs text-gray-500 break-words">{{ $fieldLabels[$key] ?? $key }}</td>
+                        <td class="py-2 px-4 text-red-600 dark:text-red-400 break-words">
                             {{ $formatValue($key, $old[$key] ?? null) }}
                         </td>
-                        <td class="py-2 px-4 text-green-600 dark:text-green-400">
+                        <td class="py-2 px-4 text-green-600 dark:text-green-400 break-words">
                             {{ $formatValue($key, $value) }}
                         </td>
                     </tr>
@@ -88,18 +93,22 @@
             </tbody>
         </table>
     @elseif ($description === 'deleted' && ! empty($old))
-        <table class="w-full text-sm border-collapse">
+        <table class="w-full text-sm border-collapse table-fixed">
+            <colgroup>
+                <col style="width: 28%">
+                <col style="width: 72%">
+            </colgroup>
             <thead>
                 <tr class="border-b border-gray-200 dark:border-gray-700">
-                    <th class="w-1/4 py-2 px-4 text-left font-medium text-gray-500">Поле</th>
+                    <th class="py-2 px-4 text-left font-medium text-gray-500">Поле</th>
                     <th class="py-2 px-4 text-left font-medium text-red-500">Значение до удаления</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($old as $key => $value)
                     <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="py-2 px-4 text-xs text-gray-500">{{ $fieldLabels[$key] ?? $key }}</td>
-                        <td class="py-2 px-4 text-gray-700 dark:text-gray-300">
+                        <td class="py-2 px-4 text-xs text-gray-500 break-words">{{ $fieldLabels[$key] ?? $key }}</td>
+                        <td class="py-2 px-4 text-gray-700 dark:text-gray-300 break-words">
                             {{ $formatValue($key, $value) }}
                         </td>
                     </tr>
@@ -107,18 +116,22 @@
             </tbody>
         </table>
     @elseif ($description === 'created' && ! empty($new))
-        <table class="w-full text-sm border-collapse">
+        <table class="w-full text-sm border-collapse table-fixed">
+            <colgroup>
+                <col style="width: 28%">
+                <col style="width: 72%">
+            </colgroup>
             <thead>
                 <tr class="border-b border-gray-200 dark:border-gray-700">
-                    <th class="w-1/4 py-2 px-4 text-left font-medium text-gray-500">Поле</th>
+                    <th class="py-2 px-4 text-left font-medium text-gray-500">Поле</th>
                     <th class="py-2 px-4 text-left font-medium text-green-500">Значение</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($new as $key => $value)
                     <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="py-2 px-4 text-xs text-gray-500">{{ $fieldLabels[$key] ?? $key }}</td>
-                        <td class="py-2 px-4 text-gray-700 dark:text-gray-300">
+                        <td class="py-2 px-4 text-xs text-gray-500 break-words">{{ $fieldLabels[$key] ?? $key }}</td>
+                        <td class="py-2 px-4 text-gray-700 dark:text-gray-300 break-words">
                             {{ $formatValue($key, $value) }}
                         </td>
                     </tr>

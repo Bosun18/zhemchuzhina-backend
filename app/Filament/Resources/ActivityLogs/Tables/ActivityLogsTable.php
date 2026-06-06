@@ -95,6 +95,7 @@ class ActivityLogsTable
                                 default => 'Детали',
                             })
                             ->modalContent(fn ($record) => view('filament.activity-log.changes', ['record' => $record]))
+                            ->modalWidth('3xl')
                             ->modalSubmitAction(false)
                             ->modalCancelActionLabel('Закрыть')
                     ),
