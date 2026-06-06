@@ -12,6 +12,7 @@ use App\Filament\Resources\RoomTypes\RoomTypeResource;
 use App\Filament\Resources\Seasons\SeasonResource;
 use App\Filament\Resources\Services\ServiceResource;
 use App\Filament\Resources\Users\UserResource;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -84,7 +85,19 @@ class ActivityLogsTable
                         'updated' => 'warning',
                         'deleted' => 'danger',
                         default => 'gray',
-                    }),
+                    })
+                    ->action(
+                        Action::make('viewChanges')
+                            ->modalHeading(fn ($record) => match ($record->description) {
+                                'updated' => 'Что изменилось',
+                                'deleted' => 'Данные до удаления',
+                                'created' => 'Созданные данные',
+                                default => 'Детали',
+                            })
+                            ->modalContent(fn ($record) => view('filament.activity-log.changes', ['record' => $record]))
+                            ->modalSubmitAction(false)
+                            ->modalCancelActionLabel('Закрыть')
+                    ),
 
                 TextColumn::make('subject_type')
                     ->label('Раздел')
