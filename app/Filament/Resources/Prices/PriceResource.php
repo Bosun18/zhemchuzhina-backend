@@ -20,6 +20,12 @@ class PriceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Цены';
+
+    protected static ?string $modelLabel = 'Цена';
+
+    protected static ?string $pluralModelLabel = 'Цены';
+
     public static function form(Schema $schema): Schema
     {
         return PriceForm::configure($schema);

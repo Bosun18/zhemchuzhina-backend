@@ -20,6 +20,12 @@ class BookingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Бронирования';
+
+    protected static ?string $modelLabel = 'Бронирование';
+
+    protected static ?string $pluralModelLabel = 'Бронирования';
+
     public static function form(Schema $schema): Schema
     {
         return BookingForm::configure($schema);

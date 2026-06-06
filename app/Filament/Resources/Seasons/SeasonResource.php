@@ -20,6 +20,12 @@ class SeasonResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Сезоны';
+
+    protected static ?string $modelLabel = 'Сезон';
+
+    protected static ?string $pluralModelLabel = 'Сезоны';
+
     public static function form(Schema $schema): Schema
     {
         return SeasonForm::configure($schema);

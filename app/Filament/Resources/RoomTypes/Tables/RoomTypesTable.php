@@ -15,15 +15,19 @@ class RoomTypesTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Название')
                     ->searchable(),
                 TextColumn::make('max_guests')
+                    ->label('Макс. гостей')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('Создан')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Обновлён')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

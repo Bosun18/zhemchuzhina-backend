@@ -15,17 +15,22 @@ class PricesTable
         return $table
             ->columns([
                 TextColumn::make('roomType.name')
+                    ->label('Тип номера')
                     ->searchable(),
                 TextColumn::make('season.name')
+                    ->label('Сезон')
                     ->searchable(),
                 TextColumn::make('price_per_night')
+                    ->label('Цена за ночь')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('Создан')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Обновлён')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

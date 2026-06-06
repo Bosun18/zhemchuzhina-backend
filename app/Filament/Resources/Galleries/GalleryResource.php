@@ -20,6 +20,12 @@ class GalleryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Галерея';
+
+    protected static ?string $modelLabel = 'Фото';
+
+    protected static ?string $pluralModelLabel = 'Галерея';
+
     public static function form(Schema $schema): Schema
     {
         return GalleryForm::configure($schema);

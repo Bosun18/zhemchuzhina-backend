@@ -15,18 +15,23 @@ class SeasonsTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Название')
                     ->searchable(),
                 TextColumn::make('date_from')
+                    ->label('Начало')
                     ->date()
                     ->sortable(),
                 TextColumn::make('date_to')
+                    ->label('Конец')
                     ->date()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('Создан')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Обновлён')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

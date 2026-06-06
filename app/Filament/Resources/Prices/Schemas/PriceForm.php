@@ -13,12 +13,15 @@ class PriceForm
         return $schema
             ->components([
                 Select::make('room_type_id')
+                    ->label('Тип номера')
                     ->relationship('roomType', 'name')
                     ->required(),
                 Select::make('season_id')
+                    ->label('Сезон')
                     ->relationship('season', 'name')
                     ->required(),
                 TextInput::make('price_per_night')
+                    ->label('Цена за ночь')
                     ->required()
                     ->numeric(),
             ]);

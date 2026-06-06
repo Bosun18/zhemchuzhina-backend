@@ -20,6 +20,12 @@ class RoomResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Номера';
+
+    protected static ?string $modelLabel = 'Номер';
+
+    protected static ?string $pluralModelLabel = 'Номера';
+
     public static function form(Schema $schema): Schema
     {
         return RoomForm::configure($schema);

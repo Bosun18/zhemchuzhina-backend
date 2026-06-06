@@ -13,10 +13,13 @@ class SeasonForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Название')
                     ->required(),
                 DatePicker::make('date_from')
+                    ->label('Начало сезона')
                     ->required(),
                 DatePicker::make('date_to')
+                    ->label('Конец сезона')
                     ->required(),
             ]);
     }

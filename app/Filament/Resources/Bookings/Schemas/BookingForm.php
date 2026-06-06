@@ -4,8 +4,8 @@ namespace App\Filament\Resources\Bookings\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class BookingForm
@@ -15,25 +15,33 @@ class BookingForm
         return $schema
             ->components([
                 Select::make('user_id')
+                    ->label('Гость')
                     ->relationship('user', 'name')
                     ->required(),
                 Select::make('room_id')
+                    ->label('Номер')
                     ->relationship('room', 'id')
                     ->required(),
                 DatePicker::make('check_in')
+                    ->label('Дата заезда')
                     ->required(),
                 DatePicker::make('check_out')
+                    ->label('Дата выезда')
                     ->required(),
                 TextInput::make('guests_count')
+                    ->label('Кол-во гостей')
                     ->required()
                     ->numeric(),
                 Select::make('status')
-                    ->options(['pending' => 'Pending', 'confirmed' => 'Confirmed', 'cancelled' => 'Cancelled'])
+                    ->label('Статус')
+                    ->options(['pending' => 'Ожидает', 'confirmed' => 'Подтверждено', 'cancelled' => 'Отменено'])
                     ->default('pending')
                     ->required(),
                 Textarea::make('comment')
+                    ->label('Комментарий')
                     ->columnSpanFull(),
                 Textarea::make('admin_comment')
+                    ->label('Комментарий администратора')
                     ->columnSpanFull(),
             ]);
     }

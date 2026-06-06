@@ -13,10 +13,13 @@ class GalleryForm
         return $schema
             ->components([
                 FileUpload::make('image')
+                    ->label('Изображение')
                     ->image()
                     ->required(),
-                TextInput::make('caption'),
+                TextInput::make('caption')
+                    ->label('Подпись'),
                 TextInput::make('sort_order')
+                    ->label('Порядок сортировки')
                     ->required()
                     ->numeric()
                     ->default(0),

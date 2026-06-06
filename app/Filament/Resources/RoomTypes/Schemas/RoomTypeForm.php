@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\RoomTypes\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class RoomTypeForm
@@ -13,10 +13,13 @@ class RoomTypeForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Название')
                     ->required(),
                 Textarea::make('description')
+                    ->label('Описание')
                     ->columnSpanFull(),
                 TextInput::make('max_guests')
+                    ->label('Макс. гостей')
                     ->required()
                     ->numeric(),
             ]);

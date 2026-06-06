@@ -17,18 +17,24 @@ class ServicesTable
         return $table
             ->columns([
                 TextColumn::make('title')
+                    ->label('Название')
                     ->searchable(),
                 TextColumn::make('price')
+                    ->label('Цена')
                     ->money()
                     ->sortable(),
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                    ->label('Изображение'),
                 IconColumn::make('is_active')
+                    ->label('Активна')
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label('Создан')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Обновлён')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

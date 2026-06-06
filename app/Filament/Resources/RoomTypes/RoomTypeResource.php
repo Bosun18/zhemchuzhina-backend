@@ -20,6 +20,12 @@ class RoomTypeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Типы номеров';
+
+    protected static ?string $modelLabel = 'Тип номера';
+
+    protected static ?string $pluralModelLabel = 'Типы номеров';
+
     public static function form(Schema $schema): Schema
     {
         return RoomTypeForm::configure($schema);

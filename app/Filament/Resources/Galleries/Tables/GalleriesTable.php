@@ -15,17 +15,22 @@ class GalleriesTable
     {
         return $table
             ->columns([
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                    ->label('Изображение'),
                 TextColumn::make('caption')
+                    ->label('Подпись')
                     ->searchable(),
                 TextColumn::make('sort_order')
+                    ->label('Порядок')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('Создан')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Обновлён')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

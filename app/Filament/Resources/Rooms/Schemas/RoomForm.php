@@ -14,15 +14,19 @@ class RoomForm
         return $schema
             ->components([
                 TextInput::make('number')
+                    ->label('Номер')
                     ->required()
                     ->numeric(),
                 TextInput::make('floor')
+                    ->label('Этаж')
                     ->required()
                     ->numeric(),
                 Select::make('room_type_id')
+                    ->label('Тип номера')
                     ->relationship('roomType', 'name')
                     ->required(),
                 Toggle::make('is_active')
+                    ->label('Активен')
                     ->required(),
             ]);
     }

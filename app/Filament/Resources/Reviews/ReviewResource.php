@@ -20,6 +20,12 @@ class ReviewResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Отзывы';
+
+    protected static ?string $modelLabel = 'Отзыв';
+
+    protected static ?string $pluralModelLabel = 'Отзывы';
+
     public static function form(Schema $schema): Schema
     {
         return ReviewForm::configure($schema);

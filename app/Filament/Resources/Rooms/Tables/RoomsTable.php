@@ -16,20 +16,26 @@ class RoomsTable
         return $table
             ->columns([
                 TextColumn::make('number')
+                    ->label('Номер')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('floor')
+                    ->label('Этаж')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('roomType.name')
+                    ->label('Тип номера')
                     ->searchable(),
                 IconColumn::make('is_active')
+                    ->label('Активен')
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label('Создан')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Обновлён')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

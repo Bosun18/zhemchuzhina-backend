@@ -17,18 +17,24 @@ class NewsTable
         return $table
             ->columns([
                 TextColumn::make('title')
+                    ->label('Заголовок')
                     ->searchable(),
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                    ->label('Изображение'),
                 IconColumn::make('is_published')
+                    ->label('Опубликовано')
                     ->boolean(),
                 TextColumn::make('published_at')
+                    ->label('Дата публикации')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('Создан')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Обновлён')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

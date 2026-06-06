@@ -15,19 +15,25 @@ class ReviewsTable
         return $table
             ->columns([
                 TextColumn::make('user.name')
+                    ->label('Гость')
                     ->searchable(),
                 TextColumn::make('booking.id')
+                    ->label('Бронирование')
                     ->searchable(),
                 TextColumn::make('rating')
+                    ->label('Оценка')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
+                    ->label('Статус')
                     ->badge(),
                 TextColumn::make('created_at')
+                    ->label('Создан')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Обновлён')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

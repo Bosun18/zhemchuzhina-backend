@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Reviews\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class ReviewForm
@@ -14,19 +14,24 @@ class ReviewForm
         return $schema
             ->components([
                 Select::make('user_id')
+                    ->label('Гость')
                     ->relationship('user', 'name')
                     ->required(),
                 Select::make('booking_id')
+                    ->label('Бронирование')
                     ->relationship('booking', 'id')
                     ->required(),
                 TextInput::make('rating')
+                    ->label('Оценка')
                     ->required()
                     ->numeric(),
                 Textarea::make('text')
+                    ->label('Текст отзыва')
                     ->required()
                     ->columnSpanFull(),
                 Select::make('status')
-                    ->options(['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected'])
+                    ->label('Статус')
+                    ->options(['pending' => 'Ожидает', 'approved' => 'Одобрен', 'rejected' => 'Отклонён'])
                     ->default('pending')
                     ->required(),
             ]);
