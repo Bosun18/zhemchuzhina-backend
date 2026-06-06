@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Schema;
 
 class UserForm
@@ -46,6 +49,33 @@ class UserForm
                 Textarea::make('admin_notes')
                     ->label('Заметки администратора')
                     ->placeholder('Например: сильно храпит, поселить в крайний номер')
+                    ->columnSpanFull(),
+                Section::make('График работы')
+                    ->description('Дни и часы, когда этот администратор получает уведомления')
+                    ->schema([
+                        CheckboxList::make('work_schedule.days')
+                            ->label('Рабочие дни')
+                            ->options([
+                                '1' => 'Понедельник',
+                                '2' => 'Вторник',
+                                '3' => 'Среда',
+                                '4' => 'Четверг',
+                                '5' => 'Пятница',
+                                '6' => 'Суббота',
+                                '7' => 'Воскресенье',
+                            ])
+                            ->columns(4)
+                            ->columnSpanFull(),
+                        TimePicker::make('work_schedule.time_from')
+                            ->label('Начало работы')
+                            ->seconds(false),
+                        TimePicker::make('work_schedule.time_to')
+                            ->label('Конец работы')
+                            ->seconds(false),
+                    ])
+                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed()
                     ->columnSpanFull(),
             ]);
     }
