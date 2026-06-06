@@ -37,6 +37,7 @@ class ManageNotificationSettings extends Page
             'notification_emails_registration' => Setting::get('notification_emails_registration', []),
             'notification_emails_booking' => Setting::get('notification_emails_booking', []),
             'notification_emails_review' => Setting::get('notification_emails_review', []),
+            'notification_emails_critical' => Setting::get('notification_emails_critical', []),
         ]);
     }
 
@@ -64,6 +65,15 @@ class ManageNotificationSettings extends Page
                                 ->nestedRecursiveRules(['email'])
                                 ->columnSpanFull(),
                         ]),
+                    Section::make('Критические уведомления')
+                        ->description('Адреса для оповещения о сбоях системы и критических ошибках. Как правило, почта разработчика.')
+                        ->schema([
+                            TagsInput::make('notification_emails_critical')
+                                ->label('Системные ошибки и сбои')
+                                ->placeholder('Добавить email...')
+                                ->nestedRecursiveRules(['email'])
+                                ->columnSpanFull(),
+                        ]),
                 ])
                     ->livewireSubmitHandler('save')
                     ->footer([
@@ -85,6 +95,7 @@ class ManageNotificationSettings extends Page
         Setting::set('notification_emails_registration', $data['notification_emails_registration'] ?? []);
         Setting::set('notification_emails_booking', $data['notification_emails_booking'] ?? []);
         Setting::set('notification_emails_review', $data['notification_emails_review'] ?? []);
+        Setting::set('notification_emails_critical', $data['notification_emails_critical'] ?? []);
 
         Notification::make()
             ->success()
