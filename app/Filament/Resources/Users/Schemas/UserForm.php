@@ -19,15 +19,17 @@ class UserForm
                 TextInput::make('email')
                     ->label('Email')
                     ->email()
+                    ->autocomplete('off')
                     ->required(),
                 TextInput::make('city')
-                    ->label('Город'),
+                    ->label('Город')
+                    ->required(),
                 TextInput::make('password')
                     ->label('Пароль')
                     ->password()
-                    ->afterStateHydrated(fn ($component) => $component->state(null))
-                    ->dehydrateStateUsing(fn (string $state) => bcrypt($state))
-                    ->dehydrated(fn (?string $state) => filled($state))
+                    ->autocomplete('new-password')
+                    ->dehydrateStateUsing(fn (string $state): string => bcrypt($state))
+                    ->saved(fn (?string $state): bool => filled($state) && password_get_info($state)['algo'] === null)
                     ->required(fn (string $operation): bool => $operation === 'create'),
                 Select::make('roles')
                     ->label('Роль')

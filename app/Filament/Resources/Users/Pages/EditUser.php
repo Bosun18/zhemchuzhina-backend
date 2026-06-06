@@ -24,6 +24,15 @@ class EditUser extends EditRecord
         return $data;
     }
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (isset($data['password']) && password_get_info($data['password'])['algo'] !== null) {
+            unset($data['password']);
+        }
+
+        return $data;
+    }
+
     protected function getRedirectUrl(): string
     {
         $url = $this->getResource()::getUrl('index');
