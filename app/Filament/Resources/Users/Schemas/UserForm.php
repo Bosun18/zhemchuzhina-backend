@@ -25,8 +25,9 @@ class UserForm
                 TextInput::make('password')
                     ->label('Пароль')
                     ->password()
-                    ->dehydrateStateUsing(fn ($state) => ! empty($state) ? bcrypt($state) : null)
-                    ->dehydrated(fn ($state) => ! empty($state))
+                    ->afterStateHydrated(fn ($component) => $component->state(null))
+                    ->dehydrateStateUsing(fn (string $state) => bcrypt($state))
+                    ->dehydrated(fn (?string $state) => filled($state))
                     ->required(fn (string $operation): bool => $operation === 'create'),
                 Select::make('roles')
                     ->label('Роль')
