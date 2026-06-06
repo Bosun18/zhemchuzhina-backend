@@ -32,7 +32,6 @@ class User extends Authenticatable implements FilamentUser
         return LogOptions::defaults()
             ->logAll()
             ->logOnlyDirty()
-            ->setLogName('user')
             ->useLogName('user');
     }
 

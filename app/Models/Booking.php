@@ -21,7 +21,6 @@ class Booking extends Model
         return LogOptions::defaults()
             ->logAll()
             ->logOnlyDirty()
-            ->setLogName('admin')
             ->useLogName('admin');
     }
 
