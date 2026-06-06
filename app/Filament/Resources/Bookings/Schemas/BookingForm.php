@@ -19,8 +19,8 @@ class BookingForm
                     ->relationship('user', 'name')
                     ->required(),
                 Select::make('room_id')
-                    ->label('Номер')
-                    ->relationship('room', 'id')
+                    ->label('Номер комнаты')
+                    ->relationship('room', 'number')
                     ->required(),
                 DatePicker::make('check_in')
                     ->label('Дата заезда')

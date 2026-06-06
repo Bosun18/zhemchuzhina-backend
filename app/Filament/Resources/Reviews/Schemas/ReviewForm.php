@@ -26,7 +26,7 @@ class ReviewForm
                     ->required()
                     ->numeric()
                     ->minValue(1)
-                    ->maxValue(5),
+                    ->maxValue(10),
                 Textarea::make('text')
                     ->label('Текст отзыва')
                     ->required()

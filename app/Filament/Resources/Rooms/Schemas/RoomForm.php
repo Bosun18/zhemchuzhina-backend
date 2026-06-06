@@ -18,11 +18,10 @@ class RoomForm
                     ->required()
                     ->numeric()
                     ->minValue(1),
-                TextInput::make('floor')
+                Select::make('floor')
                     ->label('Этаж')
-                    ->required()
-                    ->numeric()
-                    ->minValue(1),
+                    ->options([1 => '1 этаж', 2 => '2 этаж'])
+                    ->required(),
                 Select::make('room_type_id')
                     ->label('Тип номера')
                     ->relationship('roomType', 'name')
