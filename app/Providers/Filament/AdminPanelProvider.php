@@ -30,7 +30,8 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName(new HtmlString(
-                'Гостевой дом «Жемчужина»<br><span style="font-size:0.7rem;font-weight:400;opacity:0.65;">Панель администратора</span>'
+                '<span style="display:block;font-size:1.2rem;font-weight:700;line-height:1.3;">Гостевой дом «Жемчужина»</span>'.
+                '<span style="display:block;font-size:1rem;font-weight:400;opacity:0.65;line-height:1.3;">Панель администратора</span>'
             ))
             ->colors([
                 'primary' => Color::Amber,
