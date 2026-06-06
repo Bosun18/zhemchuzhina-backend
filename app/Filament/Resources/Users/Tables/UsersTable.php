@@ -26,7 +26,14 @@ class UsersTable
                     ->searchable(),
                 TextColumn::make('roles.name')
                     ->label('Роль')
-                    ->badge(),
+                    ->badge()
+                    ->formatStateUsing(fn (string $state) => match ($state) {
+                        'guest' => 'Гость',
+                        'admin' => 'Администратор',
+                        'director' => 'Директор',
+                        'developer' => 'Разработчик',
+                        default => $state,
+                    }),
                 IconColumn::make('admin_notes')
                     ->label('Заметка')
                     ->boolean()
