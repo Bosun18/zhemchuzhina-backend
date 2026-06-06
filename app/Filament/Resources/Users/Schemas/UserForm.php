@@ -31,6 +31,13 @@ class UserForm
                 Select::make('roles')
                     ->label('Роль')
                     ->relationship('roles', 'name')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => match ($record->name) {
+                        'guest' => 'Гость',
+                        'admin' => 'Администратор',
+                        'director' => 'Директор',
+                        'developer' => 'Разработчик',
+                        default => $record->name,
+                    })
                     ->preload(),
                 Textarea::make('admin_notes')
                     ->label('Заметки администратора')
