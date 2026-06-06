@@ -1,7 +1,7 @@
 @php
-    $properties = $record->properties?->toArray() ?? [];
-    $old = $properties['old'] ?? [];
-    $new = $properties['attributes'] ?? [];
+    $changes = $record->attribute_changes?->toArray() ?? [];
+    $old = $changes['old'] ?? [];
+    $new = $changes['attributes'] ?? [];
     $description = $record->description;
 @endphp
 
