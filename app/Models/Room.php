@@ -5,12 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Room extends Model
 {
+    use LogsActivity;
+
     protected $fillable = ['number', 'floor', 'room_type_id', 'is_active'];
 
     protected $casts = ['is_active' => 'boolean'];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->setLogName('admin')
+            ->useLogName('admin');
+    }
 
     public function roomType(): BelongsTo
     {

@@ -4,10 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Review extends Model
 {
+    use LogsActivity;
+
     protected $fillable = ['user_id', 'booking_id', 'rating', 'text', 'status'];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->setLogName('admin')
+            ->useLogName('admin');
+    }
 
     public function user(): BelongsTo
     {
