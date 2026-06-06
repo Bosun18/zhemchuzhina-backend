@@ -26,6 +26,8 @@ class SeasonResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Сезоны';
 
+    protected static ?int $navigationSort = 3;
+
     public static function form(Schema $schema): Schema
     {
         return SeasonForm::configure($schema);

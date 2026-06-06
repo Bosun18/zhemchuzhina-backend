@@ -26,6 +26,8 @@ class PriceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Цены';
 
+    protected static ?int $navigationSort = 4;
+
     public static function form(Schema $schema): Schema
     {
         return PriceForm::configure($schema);

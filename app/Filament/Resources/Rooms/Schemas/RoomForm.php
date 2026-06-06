@@ -16,11 +16,13 @@ class RoomForm
                 TextInput::make('number')
                     ->label('Номер')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->minValue(1),
                 TextInput::make('floor')
                     ->label('Этаж')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->minValue(1),
                 Select::make('room_type_id')
                     ->label('Тип номера')
                     ->relationship('roomType', 'name')

@@ -24,7 +24,9 @@ class ReviewForm
                 TextInput::make('rating')
                     ->label('Оценка')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->minValue(1)
+                    ->maxValue(5),
                 Textarea::make('text')
                     ->label('Текст отзыва')
                     ->required()

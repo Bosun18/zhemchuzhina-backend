@@ -26,6 +26,8 @@ class GalleryResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Галерея';
 
+    protected static ?int $navigationSort = 9;
+
     public static function form(Schema $schema): Schema
     {
         return GalleryForm::configure($schema);

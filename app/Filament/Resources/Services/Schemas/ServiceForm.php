@@ -23,6 +23,7 @@ class ServiceForm
                 TextInput::make('price')
                     ->label('Цена')
                     ->numeric()
+                    ->minValue(0)
                     ->prefix('₽'),
                 FileUpload::make('image')
                     ->label('Изображение')

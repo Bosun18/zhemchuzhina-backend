@@ -25,6 +25,10 @@ class SeasonsTable
                     ->label('Конец')
                     ->date()
                     ->sortable(),
+                TextColumn::make('prices_count')
+                    ->label('Цен')
+                    ->counts('prices')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Создан')
                     ->dateTime()

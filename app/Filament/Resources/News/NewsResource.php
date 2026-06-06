@@ -26,6 +26,8 @@ class NewsResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Новости';
 
+    protected static ?int $navigationSort = 7;
+
     public static function form(Schema $schema): Schema
     {
         return NewsForm::configure($schema);

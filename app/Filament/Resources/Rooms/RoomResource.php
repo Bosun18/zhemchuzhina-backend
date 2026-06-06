@@ -26,6 +26,8 @@ class RoomResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Номера';
 
+    protected static ?int $navigationSort = 2;
+
     public static function form(Schema $schema): Schema
     {
         return RoomForm::configure($schema);

@@ -22,6 +22,7 @@ class GalleryForm
                     ->label('Порядок сортировки')
                     ->required()
                     ->numeric()
+                    ->minValue(0)
                     ->default(0),
             ]);
     }

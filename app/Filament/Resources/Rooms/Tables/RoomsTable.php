@@ -26,6 +26,10 @@ class RoomsTable
                 TextColumn::make('roomType.name')
                     ->label('Тип номера')
                     ->searchable(),
+                TextColumn::make('bookings_count')
+                    ->label('Бронирований')
+                    ->counts('bookings')
+                    ->sortable(),
                 IconColumn::make('is_active')
                     ->label('Активен')
                     ->boolean(),

@@ -31,7 +31,8 @@ class BookingForm
                 TextInput::make('guests_count')
                     ->label('Кол-во гостей')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->minValue(1),
                 Select::make('status')
                     ->label('Статус')
                     ->options(['pending' => 'Ожидает', 'confirmed' => 'Подтверждено', 'cancelled' => 'Отменено'])

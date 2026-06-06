@@ -23,7 +23,8 @@ class PriceForm
                 TextInput::make('price_per_night')
                     ->label('Цена за ночь')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->minValue(0),
             ]);
     }
 }
