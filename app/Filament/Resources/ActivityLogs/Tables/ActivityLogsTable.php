@@ -30,6 +30,7 @@ class ActivityLogsTable
         'News' => 'Новость (News)',
         'Service' => 'Услуга (Service)',
         'Gallery' => 'Фото (Gallery)',
+        'Setting' => 'Настройка (Setting)',
     ];
 
     private static array $resourceMap = [
@@ -132,6 +133,7 @@ class ActivityLogsTable
                             'News' => $subject->title ?? "Новость #{$state}",
                             'Service' => $subject->title ?? "Услуга #{$state}",
                             'Gallery' => "Фото #{$state}",
+                            'Setting' => $subject->key ?? "Настройка #{$state}",
                             default => "#{$state}",
                         };
                     })
