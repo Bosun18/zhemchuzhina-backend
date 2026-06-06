@@ -38,6 +38,7 @@ class UserForm
                         'developer' => 'Разработчик',
                         default => $record->name,
                     })
+                    ->multiple()
                     ->preload(),
                 Textarea::make('admin_notes')
                     ->label('Заметки администратора')

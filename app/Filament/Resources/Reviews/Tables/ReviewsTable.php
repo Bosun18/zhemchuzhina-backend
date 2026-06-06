@@ -26,7 +26,13 @@ class ReviewsTable
                     ->sortable(),
                 TextColumn::make('status')
                     ->label('Статус')
-                    ->badge(),
+                    ->badge()
+                    ->formatStateUsing(fn (string $state) => match ($state) {
+                        'pending' => 'Ожидает',
+                        'approved' => 'Одобрен',
+                        'rejected' => 'Отклонён',
+                        default => $state,
+                    }),
                 TextColumn::make('created_at')
                     ->label('Создан')
                     ->dateTime()
