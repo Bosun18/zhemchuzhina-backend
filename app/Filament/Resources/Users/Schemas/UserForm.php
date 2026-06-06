@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Spatie\Permission\Models\Role;
 
 class UserForm
 {
@@ -45,13 +47,21 @@ class UserForm
                         default => $record->name,
                     })
                     ->multiple()
-                    ->preload(),
+                    ->preload()
+                    ->live(),
                 Textarea::make('admin_notes')
                     ->label('Заметки администратора')
                     ->placeholder('Например: сильно храпит, поселить в крайний номер')
                     ->columnSpanFull(),
                 Section::make('График работы')
                     ->description('Дни и часы, когда этот администратор получает уведомления')
+                    ->visible(function (Get $get): bool {
+                        $roleIds = $get('roles') ?? [];
+
+                        return Role::whereIn('id', $roleIds)
+                            ->whereIn('name', ['admin', 'director'])
+                            ->exists();
+                    })
                     ->schema([
                         CheckboxList::make('work_schedule.days')
                             ->label('Рабочие дни')
