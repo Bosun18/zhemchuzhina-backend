@@ -17,8 +17,17 @@ class EditUser extends EditRecord
         ];
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        unset($data['password']);
+
+        return $data;
+    }
+
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('index');
+        $url = $this->getResource()::getUrl('index');
+
+        return parse_url($url, PHP_URL_PATH);
     }
 }
