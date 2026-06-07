@@ -48,6 +48,15 @@
 
     $dateFields = ['created_at', 'updated_at', 'published_at', 'email_verified_at', 'date_from', 'date_to', 'check_in', 'check_out'];
 
+    // Filament не подключает Tailwind-сборку приложения для кастомных view, поэтому здесь
+    // используются инлайн-стили — utility-классы из этого файла не попадают в бандл и не работают.
+    $borderColor = 'rgba(120, 120, 120, 0.35)';
+    $borderColorSoft = 'rgba(120, 120, 120, 0.18)';
+    $labelColor = '#9ca3af';
+    $oldColor = '#ef4444';
+    $newColor = '#22c55e';
+    $cellStyle = 'padding: 0.5rem 0.75rem; vertical-align: top; word-break: break-word; overflow-wrap: anywhere;';
+
     $formatValue = function ($key, $value) use ($dateFields) {
         if (is_array($value)) {
             return json_encode($value);
@@ -63,29 +72,29 @@
     };
 @endphp
 
-<div class="p-2">
+<div style="padding: 0.5rem;">
     @if ($description === 'updated' && ! empty($new))
-        <table class="w-full text-sm border-collapse table-fixed">
+        <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.875rem;">
             <colgroup>
-                <col style="width: 28%">
-                <col style="width: 36%">
-                <col style="width: 36%">
+                <col style="width: 33.333%">
+                <col style="width: 33.333%">
+                <col style="width: 33.333%">
             </colgroup>
             <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                    <th class="py-2 px-4 text-left font-medium text-gray-500">Поле</th>
-                    <th class="py-2 px-4 text-left font-medium text-red-500">Было</th>
-                    <th class="py-2 px-4 text-left font-medium text-green-500">Стало</th>
+                <tr style="border-bottom: 1px solid {{ $borderColor }};">
+                    <th style="padding: 0.5rem 0.75rem; text-align: left; font-weight: 500; color: {{ $labelColor }};">Поле</th>
+                    <th style="padding: 0.5rem 0.75rem; text-align: center; font-weight: 500; color: {{ $oldColor }}; border-left: 1px solid {{ $borderColor }};">Было</th>
+                    <th style="padding: 0.5rem 0.75rem; text-align: right; font-weight: 500; color: {{ $newColor }}; border-left: 1px solid {{ $borderColor }};">Стало</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($new as $key => $value)
-                    <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="py-2 px-4 text-xs text-gray-500 break-words">{{ $fieldLabels[$key] ?? $key }}</td>
-                        <td class="py-2 px-4 text-red-600 dark:text-red-400 break-words">
+                    <tr style="border-bottom: 1px solid {{ $borderColorSoft }};">
+                        <td style="{{ $cellStyle }} text-align: left; font-size: 0.75rem; color: {{ $labelColor }};">{{ $fieldLabels[$key] ?? $key }}</td>
+                        <td style="{{ $cellStyle }} text-align: center; color: {{ $oldColor }}; border-left: 1px solid {{ $borderColorSoft }};">
                             {{ $formatValue($key, $old[$key] ?? null) }}
                         </td>
-                        <td class="py-2 px-4 text-green-600 dark:text-green-400 break-words">
+                        <td style="{{ $cellStyle }} text-align: right; color: {{ $newColor }}; border-left: 1px solid {{ $borderColorSoft }};">
                             {{ $formatValue($key, $value) }}
                         </td>
                     </tr>
@@ -93,22 +102,22 @@
             </tbody>
         </table>
     @elseif ($description === 'deleted' && ! empty($old))
-        <table class="w-full text-sm border-collapse table-fixed">
+        <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.875rem;">
             <colgroup>
-                <col style="width: 28%">
-                <col style="width: 72%">
+                <col style="width: 30%">
+                <col style="width: 70%">
             </colgroup>
             <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                    <th class="py-2 px-4 text-left font-medium text-gray-500">Поле</th>
-                    <th class="py-2 px-4 text-left font-medium text-red-500">Значение до удаления</th>
+                <tr style="border-bottom: 1px solid {{ $borderColor }};">
+                    <th style="padding: 0.5rem 0.75rem; text-align: left; font-weight: 500; color: {{ $labelColor }};">Поле</th>
+                    <th style="padding: 0.5rem 0.75rem; text-align: left; font-weight: 500; color: {{ $oldColor }}; border-left: 1px solid {{ $borderColor }};">Значение до удаления</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($old as $key => $value)
-                    <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="py-2 px-4 text-xs text-gray-500 break-words">{{ $fieldLabels[$key] ?? $key }}</td>
-                        <td class="py-2 px-4 text-gray-700 dark:text-gray-300 break-words">
+                    <tr style="border-bottom: 1px solid {{ $borderColorSoft }};">
+                        <td style="{{ $cellStyle }} text-align: left; font-size: 0.75rem; color: {{ $labelColor }};">{{ $fieldLabels[$key] ?? $key }}</td>
+                        <td style="{{ $cellStyle }} text-align: left; border-left: 1px solid {{ $borderColorSoft }};">
                             {{ $formatValue($key, $value) }}
                         </td>
                     </tr>
@@ -116,22 +125,22 @@
             </tbody>
         </table>
     @elseif ($description === 'created' && ! empty($new))
-        <table class="w-full text-sm border-collapse table-fixed">
+        <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 0.875rem;">
             <colgroup>
-                <col style="width: 28%">
-                <col style="width: 72%">
+                <col style="width: 30%">
+                <col style="width: 70%">
             </colgroup>
             <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                    <th class="py-2 px-4 text-left font-medium text-gray-500">Поле</th>
-                    <th class="py-2 px-4 text-left font-medium text-green-500">Значение</th>
+                <tr style="border-bottom: 1px solid {{ $borderColor }};">
+                    <th style="padding: 0.5rem 0.75rem; text-align: left; font-weight: 500; color: {{ $labelColor }};">Поле</th>
+                    <th style="padding: 0.5rem 0.75rem; text-align: left; font-weight: 500; color: {{ $newColor }}; border-left: 1px solid {{ $borderColor }};">Значение</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($new as $key => $value)
-                    <tr class="border-b border-gray-100 dark:border-gray-800">
-                        <td class="py-2 px-4 text-xs text-gray-500 break-words">{{ $fieldLabels[$key] ?? $key }}</td>
-                        <td class="py-2 px-4 text-gray-700 dark:text-gray-300 break-words">
+                    <tr style="border-bottom: 1px solid {{ $borderColorSoft }};">
+                        <td style="{{ $cellStyle }} text-align: left; font-size: 0.75rem; color: {{ $labelColor }};">{{ $fieldLabels[$key] ?? $key }}</td>
+                        <td style="{{ $cellStyle }} text-align: left; border-left: 1px solid {{ $borderColorSoft }};">
                             {{ $formatValue($key, $value) }}
                         </td>
                     </tr>
@@ -139,6 +148,6 @@
             </tbody>
         </table>
     @else
-        <p class="py-4 text-center text-sm text-gray-400">Нет данных об изменениях.</p>
+        <p style="padding: 1rem 0; text-align: center; font-size: 0.875rem; color: {{ $labelColor }};">Нет данных об изменениях.</p>
     @endif
 </div>

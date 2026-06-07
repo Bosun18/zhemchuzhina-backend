@@ -13,6 +13,7 @@ use App\Filament\Resources\Seasons\SeasonResource;
 use App\Filament\Resources\Services\ServiceResource;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -97,6 +98,7 @@ class ActivityLogsTable
                             })
                             ->modalContent(fn ($record) => view('filament.activity-log.changes', ['record' => $record]))
                             ->modalWidth('3xl')
+                            ->modalAlignment(Alignment::Start)
                             ->modalSubmitAction(false)
                             ->modalCancelActionLabel('Закрыть')
                     ),
