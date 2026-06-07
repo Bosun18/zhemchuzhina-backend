@@ -20,6 +20,7 @@ class ProfileController extends Controller
 
         $data = $request->validate([
             'name' => 'sometimes|string|max:255',
+            'phone' => 'nullable|string|max:20',
             'city' => 'sometimes|string|max:255',
             'password' => 'sometimes|string|min:8|confirmed',
         ]);
@@ -39,6 +40,7 @@ class ProfileController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
+            'phone' => $user->phone,
             'city' => $user->city,
             'role' => $user->getRoleNames()->first(),
         ];
