@@ -2,11 +2,15 @@
 
 namespace App\Filament\Resources\Bookings\Tables;
 
+use App\Mail\BookingCancelled;
+use App\Mail\BookingConfirmed;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Mail;
 
 class BookingsTable
 {
@@ -57,6 +61,28 @@ class BookingsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('confirm')
+                    ->label('Подтвердить')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn ($record) => $record->status === 'pending')
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        $record->update(['status' => 'confirmed']);
+                        Mail::to($record->user->email)
+                            ->send(new BookingConfirmed($record->load(['user', 'room.roomType'])));
+                    }),
+                Action::make('cancel')
+                    ->label('Отменить')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->visible(fn ($record) => $record->status !== 'cancelled')
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        $record->update(['status' => 'cancelled']);
+                        Mail::to($record->user->email)
+                            ->send(new BookingCancelled($record->load(['user', 'room.roomType'])));
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
