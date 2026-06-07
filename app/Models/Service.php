@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\ServiceFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 class Service extends Model
 {
-    use LogsActivity;
+    /** @use HasFactory<ServiceFactory> */
+    use HasFactory, LogsActivity;
 
     protected $fillable = ['title', 'description', 'price', 'image', 'is_active'];
 

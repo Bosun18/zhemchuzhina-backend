@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\PriceFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -9,7 +11,8 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Price extends Model
 {
-    use LogsActivity;
+    /** @use HasFactory<PriceFactory> */
+    use HasFactory, LogsActivity;
 
     protected $fillable = ['room_type_id', 'season_id', 'price_per_night'];
 

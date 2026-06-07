@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\BookingFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -10,7 +12,8 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Booking extends Model
 {
-    use LogsActivity;
+    /** @use HasFactory<BookingFactory> */
+    use HasFactory, LogsActivity;
 
     protected $fillable = ['user_id', 'room_id', 'check_in', 'check_out', 'guests_count', 'status', 'comment', 'admin_comment'];
 

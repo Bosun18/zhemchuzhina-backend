@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\SettingFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 class Setting extends Model
 {
-    use LogsActivity;
+    /** @use HasFactory<SettingFactory> */
+    use HasFactory, LogsActivity;
 
     protected $fillable = ['key', 'value'];
 

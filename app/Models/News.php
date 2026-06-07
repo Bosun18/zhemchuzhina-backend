@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\NewsFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 class News extends Model
 {
-    use LogsActivity;
+    /** @use HasFactory<NewsFactory> */
+    use HasFactory, LogsActivity;
 
     protected $fillable = ['title', 'content', 'image', 'is_published', 'published_at'];
 
