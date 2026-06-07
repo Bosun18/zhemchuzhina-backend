@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\RoomFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +12,8 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Room extends Model
 {
-    use LogsActivity;
+    /** @use HasFactory<RoomFactory> */
+    use HasFactory, LogsActivity;
 
     protected $fillable = ['number', 'floor', 'room_type_id', 'is_active'];
 
@@ -22,6 +25,11 @@ class Room extends Model
             ->logAll()
             ->logOnlyDirty()
             ->useLogName('admin');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 
     public function roomType(): BelongsTo
