@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Reviews\Schemas;
 
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class ReviewForm
@@ -13,29 +12,24 @@ class ReviewForm
     {
         return $schema
             ->components([
-                Select::make('user_id')
+                Placeholder::make('user_name')
                     ->label('Гость')
-                    ->relationship('user', 'name')
-                    ->required(),
-                Select::make('booking_id')
-                    ->label('Бронирование')
-                    ->relationship('booking', 'id')
-                    ->required(),
-                TextInput::make('rating')
+                    ->content(fn ($record) => $record?->user->name ?? '—'),
+
+                Placeholder::make('rating_display')
                     ->label('Оценка')
-                    ->required()
-                    ->numeric()
-                    ->minValue(1)
-                    ->maxValue(10),
-                Textarea::make('text')
+                    ->content(fn ($record) => $record ? "{$record->rating}/10" : '—'),
+
+                Placeholder::make('text_display')
                     ->label('Текст отзыва')
-                    ->required()
+                    ->content(fn ($record) => $record?->text ?? '—')
                     ->columnSpanFull(),
-                Select::make('status')
-                    ->label('Статус')
-                    ->options(['pending' => 'Ожидает', 'approved' => 'Одобрен', 'rejected' => 'Отклонён'])
-                    ->default('pending')
-                    ->required(),
+
+                Textarea::make('admin_comment')
+                    ->label('Комментарий администратора')
+                    ->placeholder('Причина отклонения или внутренняя заметка...')
+                    ->rows(3)
+                    ->columnSpanFull(),
             ]);
     }
 }

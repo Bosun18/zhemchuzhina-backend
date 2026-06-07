@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Reviews;
 
-use App\Filament\Resources\Reviews\Pages\CreateReview;
 use App\Filament\Resources\Reviews\Pages\EditReview;
 use App\Filament\Resources\Reviews\Pages\ListReviews;
 use App\Filament\Resources\Reviews\Schemas\ReviewForm;
@@ -45,11 +44,15 @@ class ReviewResource extends Resource
         ];
     }
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => ListReviews::route('/'),
-            'create' => CreateReview::route('/create'),
             'edit' => EditReview::route('/{record}/edit'),
         ];
     }

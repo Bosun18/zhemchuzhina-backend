@@ -21,6 +21,7 @@ class ReviewController extends Controller
                 'rating' => $review->rating,
                 'text' => $review->text,
                 'user' => $review->user->name,
+                'admin_comment' => $review->admin_comment,
                 'created_at' => $review->created_at,
             ]);
 
