@@ -89,5 +89,11 @@ class DatabaseSeeder extends Seeder
         User::factory(5)->create()->each(function ($user) {
             $user->assignRole('guest');
         });
+
+        $this->call([
+            ServicesSeeder::class,
+            NewsSeeder::class,
+            GallerySeeder::class,
+        ]);
     }
 }
