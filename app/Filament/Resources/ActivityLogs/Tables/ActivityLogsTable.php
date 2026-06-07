@@ -12,11 +12,16 @@ use App\Filament\Resources\RoomTypes\RoomTypeResource;
 use App\Filament\Resources\Seasons\SeasonResource;
 use App\Filament\Resources\Services\ServiceResource;
 use App\Filament\Resources\Users\UserResource;
+use App\Models\User;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogsTable
 {
@@ -46,6 +51,30 @@ class ActivityLogsTable
         'Service' => ServiceResource::class,
         'Gallery' => GalleryResource::class,
     ];
+
+    /**
+     * @return array<int|string, string>
+     */
+    private static function causerOptions(): array
+    {
+        $options = User::query()
+            ->whereIn('id', function ($query) {
+                $query->select('causer_id')
+                    ->from('activity_log')
+                    ->where('causer_type', User::class)
+                    ->whereNotNull('causer_id')
+                    ->distinct();
+            })
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->toArray();
+
+        if (Activity::query()->whereNull('causer_id')->exists()) {
+            $options = ['system' => 'Изменено системой'] + $options;
+        }
+
+        return $options;
+    }
 
     public static function configure(Table $table): Table
     {
@@ -88,6 +117,7 @@ class ActivityLogsTable
                         'deleted' => 'danger',
                         default => 'gray',
                     })
+                    ->sortable()
                     ->action(
                         Action::make('viewChanges')
                             ->modalHeading(fn ($record) => match ($record->description) {
@@ -139,6 +169,7 @@ class ActivityLogsTable
                             default => "#{$state}",
                         };
                     })
+                    ->sortable()
                     ->url(function ($record) {
                         if (! $record->subject_id || ! $record->subject_type) {
                             return null;
@@ -161,7 +192,16 @@ class ActivityLogsTable
 
                 TextColumn::make('causer.name')
                     ->label('Кто изменил')
-                    ->default('—'),
+                    ->default('Изменено системой')
+                    ->sortable(query: function (Builder $query, string $direction) {
+                        return $query
+                            ->leftJoin('users', function ($join) {
+                                $join->on('users.id', '=', 'activity_log.causer_id')
+                                    ->where('activity_log.causer_type', '=', User::class);
+                            })
+                            ->orderBy('users.name', $direction)
+                            ->select('activity_log.*');
+                    }),
 
                 TextColumn::make('created_at')
                     ->label('Дата')
@@ -184,6 +224,28 @@ class ActivityLogsTable
                         'updated' => 'Изменено',
                         'deleted' => 'Удалено',
                     ]),
+
+                SelectFilter::make('subject_type')
+                    ->label('Раздел')
+                    ->options(
+                        collect(self::$modelLabels)
+                            ->mapWithKeys(fn (string $label, string $basename) => ["App\\Models\\{$basename}" => $label])
+                            ->toArray()
+                    ),
+
+                Filter::make('causer')
+                    ->label('Кто изменил')
+                    ->schema([
+                        Select::make('value')
+                            ->label('Кто изменил')
+                            ->options(fn () => self::causerOptions())
+                            ->placeholder('Все'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => match ($data['value'] ?? null) {
+                        null, '' => $query,
+                        'system' => $query->whereNull('causer_id'),
+                        default => $query->where('causer_id', $data['value']),
+                    }),
             ])
             ->defaultSort('created_at', 'desc')
             ->paginated([25, 50, 100]);
