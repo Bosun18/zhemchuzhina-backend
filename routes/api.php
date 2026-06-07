@@ -11,8 +11,8 @@ use App\Http\Controllers\Api\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 // Публичные маршруты
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/rooms', [RoomController::class, 'index']);
 Route::get('/rooms/availability', [RoomController::class, 'availability']);
@@ -29,7 +29,7 @@ Route::get('/reviews', [ReviewController::class, 'index']);
 
 // Только авторизованным
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::patch('/profile', [ProfileController::class, 'update']);
