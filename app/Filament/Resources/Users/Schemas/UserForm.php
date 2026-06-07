@@ -26,6 +26,10 @@ class UserForm
                     ->email()
                     ->autocomplete('off')
                     ->required(),
+                TextInput::make('phone')
+                    ->label('Телефон')
+                    ->tel()
+                    ->maxLength(20),
                 TextInput::make('city')
                     ->label('Город')
                     ->required(),
