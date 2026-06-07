@@ -7,6 +7,12 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Документация проекта
+
+- [API_FRONTEND.md](API_FRONTEND.md) — документация REST API для клиентского приложения (фронтенд)
+- [API_ADMIN.md](API_ADMIN.md) — документация REST API для персонала (управление бронированиями)
+- [TEST_CLEANUP.md](TEST_CLEANUP.md) — список тестовых данных и файлов, которые нужно удалить перед продакшеном
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
