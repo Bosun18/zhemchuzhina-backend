@@ -62,8 +62,8 @@ class AuthController extends Controller
             url: UserResource::getUrl('edit', ['record' => $user]),
         );
 
-        foreach (User::role(['admin', 'director', 'developer'])->get() as $staffMember) {
-            $staffMember->notify($staffNotification);
+        foreach (User::role('admin')->get() as $admin) {
+            $admin->notify($staffNotification);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

@@ -11,6 +11,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
@@ -45,21 +46,23 @@ class BookingController extends Controller
             ]);
         }
 
-        if ($this->hasOverlap($room->id, $data['check_in'], $data['check_out'])) {
-            throw ValidationException::withMessages([
-                'room_id' => ['Номер занят на выбранные даты.'],
-            ]);
-        }
+        $booking = DB::transaction(function () use ($data, $room, $request) {
+            if ($this->hasOverlap($room->id, $data['check_in'], $data['check_out'], lock: true)) {
+                throw ValidationException::withMessages([
+                    'room_id' => ['Номер занят на выбранные даты.'],
+                ]);
+            }
 
-        $booking = Booking::create([
-            'user_id' => $request->user()->id,
-            'room_id' => $room->id,
-            'check_in' => $data['check_in'],
-            'check_out' => $data['check_out'],
-            'guests_count' => $data['guests_count'],
-            'status' => 'pending',
-            'comment' => $data['comment'] ?? null,
-        ]);
+            return Booking::create([
+                'user_id' => $request->user()->id,
+                'room_id' => $room->id,
+                'check_in' => $data['check_in'],
+                'check_out' => $data['check_out'],
+                'guests_count' => $data['guests_count'],
+                'status' => 'pending',
+                'comment' => $data['comment'] ?? null,
+            ]);
+        });
 
         activity()->useLog('user')
             ->performedOn($booking)
@@ -80,8 +83,8 @@ class BookingController extends Controller
             url: BookingResource::getUrl('edit', ['record' => $booking]),
         );
 
-        foreach (User::role(['admin', 'director', 'developer'])->get() as $staffMember) {
-            $staffMember->notify($staffNotification);
+        foreach (User::role('admin')->get() as $admin) {
+            $admin->notify($staffNotification);
         }
 
         return response()->json($this->formatBooking($booking), 201);
@@ -135,22 +138,24 @@ class BookingController extends Controller
             'admin_comment' => 'nullable|string|max:1000',
         ]);
 
-        if ($this->hasOverlap($data['room_id'], $data['check_in'], $data['check_out'])) {
-            throw ValidationException::withMessages([
-                'room_id' => ['Номер занят на выбранные даты.'],
-            ]);
-        }
+        $booking = DB::transaction(function () use ($data) {
+            if ($this->hasOverlap($data['room_id'], $data['check_in'], $data['check_out'], lock: true)) {
+                throw ValidationException::withMessages([
+                    'room_id' => ['Номер занят на выбранные даты.'],
+                ]);
+            }
 
-        $booking = Booking::create([
-            'user_id' => $data['user_id'],
-            'room_id' => $data['room_id'],
-            'check_in' => $data['check_in'],
-            'check_out' => $data['check_out'],
-            'guests_count' => $data['guests_count'],
-            'status' => $data['status'] ?? 'confirmed',
-            'comment' => $data['comment'] ?? null,
-            'admin_comment' => $data['admin_comment'] ?? null,
-        ]);
+            return Booking::create([
+                'user_id' => $data['user_id'],
+                'room_id' => $data['room_id'],
+                'check_in' => $data['check_in'],
+                'check_out' => $data['check_out'],
+                'guests_count' => $data['guests_count'],
+                'status' => $data['status'] ?? 'confirmed',
+                'comment' => $data['comment'] ?? null,
+                'admin_comment' => $data['admin_comment'] ?? null,
+            ]);
+        });
 
         return response()->json(
             $this->formatBooking($booking->load(['user:id,name,email', 'room.roomType']), forStaff: true),
@@ -158,13 +163,23 @@ class BookingController extends Controller
         );
     }
 
-    private function hasOverlap(int $roomId, string $checkIn, string $checkOut): bool
+    /**
+     * Проверяет пересечение с активными бронями номера на указанные даты.
+     * При $lock = true берёт блокировку строк (внутри транзакции),
+     * чтобы исключить гонку при одновременном бронировании одного номера.
+     */
+    private function hasOverlap(int $roomId, string $checkIn, string $checkOut, bool $lock = false): bool
     {
-        return Booking::where('room_id', $roomId)
-            ->whereNotIn('status', ['cancelled'])
+        $query = Booking::where('room_id', $roomId)
+            ->where('status', '!=', 'cancelled')
             ->where('check_in', '<', $checkOut)
-            ->where('check_out', '>', $checkIn)
-            ->exists();
+            ->where('check_out', '>', $checkIn);
+
+        if ($lock) {
+            $query->lockForUpdate();
+        }
+
+        return $query->exists();
     }
 
     private function formatBooking(Booking $booking, bool $forStaff = false): array

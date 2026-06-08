@@ -55,12 +55,12 @@ class ReviewsTableActionsTest extends TestCase
             'admin_comment' => 'Спасибо за отзыв!',
         ]);
 
-        Mail::assertSent(ReviewApproved::class, function (ReviewApproved $mail) use ($review) {
+        Mail::assertQueued(ReviewApproved::class, function (ReviewApproved $mail) use ($review) {
             return $mail->review->is($review)
                 && $mail->hasTo($review->user->email);
         });
 
-        Mail::assertNotSent(ReviewRejected::class);
+        Mail::assertNotQueued(ReviewRejected::class);
 
         Notification::assertSentTo(
             $review->user,
@@ -91,19 +91,19 @@ class ReviewsTableActionsTest extends TestCase
             'admin_comment' => 'Отзыв содержит недопустимый контент.',
         ]);
 
-        Mail::assertSent(ReviewRejected::class, function (ReviewRejected $mail) use ($review) {
+        Mail::assertQueued(ReviewRejected::class, function (ReviewRejected $mail) use ($review) {
             return $mail->review->is($review)
                 && $mail->hasTo($review->user->email)
                 && ! $mail->isDirector;
         });
-        Mail::assertSent(ReviewRejected::class, function (ReviewRejected $mail) use ($review, $director) {
+        Mail::assertQueued(ReviewRejected::class, function (ReviewRejected $mail) use ($review, $director) {
             return $mail->review->is($review)
                 && $mail->hasTo($director->email)
                 && $mail->isDirector;
         });
-        Mail::assertSent(ReviewRejected::class, 2);
+        Mail::assertQueued(ReviewRejected::class, 2);
 
-        Mail::assertNotSent(ReviewApproved::class);
+        Mail::assertNotQueued(ReviewApproved::class);
 
         Notification::assertSentTo(
             $review->user,

@@ -89,12 +89,12 @@ class BookingsTableActionsTest extends TestCase
             'status' => 'confirmed',
         ]);
 
-        Mail::assertSent(BookingConfirmed::class, function (BookingConfirmed $mail) use ($booking) {
+        Mail::assertQueued(BookingConfirmed::class, function (BookingConfirmed $mail) use ($booking) {
             return $mail->booking->is($booking)
                 && $mail->hasTo($booking->user->email);
         });
 
-        Mail::assertNotSent(BookingCancelled::class);
+        Mail::assertNotQueued(BookingCancelled::class);
 
         Notification::assertSentTo(
             $booking->user,
@@ -122,21 +122,21 @@ class BookingsTableActionsTest extends TestCase
             'status' => 'cancelled',
         ]);
 
-        Mail::assertSent(BookingCancelled::class, function (BookingCancelled $mail) use ($booking) {
+        Mail::assertQueued(BookingCancelled::class, function (BookingCancelled $mail) use ($booking) {
             return $mail->booking->is($booking)
                 && $mail->hasTo($booking->user->email)
                 && ! $mail->isDirector;
         });
 
-        Mail::assertSent(BookingCancelled::class, function (BookingCancelled $mail) use ($booking, $director) {
+        Mail::assertQueued(BookingCancelled::class, function (BookingCancelled $mail) use ($booking, $director) {
             return $mail->booking->is($booking)
                 && $mail->hasTo($director->email)
                 && $mail->isDirector;
         });
 
-        Mail::assertSent(BookingCancelled::class, 2);
+        Mail::assertQueued(BookingCancelled::class, 2);
 
-        Mail::assertNotSent(BookingConfirmed::class);
+        Mail::assertNotQueued(BookingConfirmed::class);
 
         Notification::assertSentTo(
             $booking->user,

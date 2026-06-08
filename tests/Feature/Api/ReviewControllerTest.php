@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\UserNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
@@ -87,6 +88,8 @@ class ReviewControllerTest extends TestCase
 
         $admin = User::factory()->create();
         $admin->assignRole('admin');
+        $director = User::factory()->create();
+        $director->assignRole('director');
 
         $user = User::factory()->create();
         $user->assignRole('guest');
@@ -103,6 +106,9 @@ class ReviewControllerTest extends TestCase
             UserNotification::class,
             fn (UserNotification $notification) => $notification->title === 'Новый отзыв на модерации'
         );
+
+        // Сценарий 2: новый отзыв — только админу, не директору.
+        Notification::assertNotSentTo($director, UserNotification::class);
     }
 
     public function test_user_cannot_review_someone_elses_booking(): void
@@ -149,6 +155,16 @@ class ReviewControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)->assertJsonValidationErrors('booking_id');
+    }
+
+    public function test_database_rejects_a_second_review_for_the_same_booking(): void
+    {
+        $booking = Booking::factory()->create(['status' => 'confirmed']);
+        Review::factory()->create(['booking_id' => $booking->id]);
+
+        $this->expectException(UniqueConstraintViolationException::class);
+
+        Review::factory()->create(['booking_id' => $booking->id]);
     }
 
     public function test_store_validates_input(): void

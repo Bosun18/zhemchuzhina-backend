@@ -21,7 +21,7 @@
     </div>
     <div class="content">
         @if($isDirector)
-            <p>Уведомление для директора: бронирование гостя <strong>{{ $booking->user->name }}</strong> было отменено.</p>
+            <p>Уведомление для администрации: бронирование гостя <strong>{{ $booking->user->name }}</strong> было отменено.</p>
         @else
             <p>Здравствуйте, <strong>{{ $booking->user->name }}</strong>!</p>
             <p>К сожалению, ваше бронирование <span class="badge">✗ Отменено</span></p>

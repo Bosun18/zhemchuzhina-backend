@@ -55,7 +55,7 @@ class AuthControllerTest extends TestCase
             'city' => 'Москва',
         ])->assertCreated();
 
-        Mail::assertSent(Welcome::class, fn (Welcome $mail) => $mail->hasTo('ivan@example.com')
+        Mail::assertQueued(Welcome::class, fn (Welcome $mail) => $mail->hasTo('ivan@example.com')
             && $mail->user->email === 'ivan@example.com');
     }
 
@@ -65,6 +65,8 @@ class AuthControllerTest extends TestCase
 
         $admin = User::factory()->create();
         $admin->assignRole('admin');
+        $director = User::factory()->create();
+        $director->assignRole('director');
 
         $this->postJson('/api/register', [
             'name' => 'Иван Иванов',
@@ -80,6 +82,9 @@ class AuthControllerTest extends TestCase
             UserNotification::class,
             fn (UserNotification $notification) => $notification->title === 'Новый пользователь зарегистрировался'
         );
+
+        // Сценарий 1: новые события — только админу, не директору.
+        Notification::assertNotSentTo($director, UserNotification::class);
     }
 
     public function test_user_receives_bell_notification_after_registration(): void

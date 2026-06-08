@@ -58,17 +58,17 @@ class NotifyDirectorsAboutOverduePendingTest extends TestCase
 
         $this->artisan('app:notify-directors-about-overdue-pending')->assertExitCode(0);
 
-        Mail::assertSent(BookingPendingTooLong::class, function (BookingPendingTooLong $mail) use ($overdueBooking, $director) {
+        Mail::assertQueued(BookingPendingTooLong::class, function (BookingPendingTooLong $mail) use ($overdueBooking, $director) {
             return $mail->booking->is($overdueBooking)
                 && $mail->hasTo($director->email);
         });
-        Mail::assertSent(BookingPendingTooLong::class, 1);
+        Mail::assertQueued(BookingPendingTooLong::class, 1);
 
-        Mail::assertSent(ReviewPendingTooLong::class, function (ReviewPendingTooLong $mail) use ($overdueReview, $director) {
+        Mail::assertQueued(ReviewPendingTooLong::class, function (ReviewPendingTooLong $mail) use ($overdueReview, $director) {
             return $mail->review->is($overdueReview)
                 && $mail->hasTo($director->email);
         });
-        Mail::assertSent(ReviewPendingTooLong::class, 1);
+        Mail::assertQueued(ReviewPendingTooLong::class, 1);
 
         Notification::assertSentTo(
             $director,
@@ -89,6 +89,6 @@ class NotifyDirectorsAboutOverduePendingTest extends TestCase
         Mail::fake();
         $this->artisan('app:notify-directors-about-overdue-pending')->assertExitCode(0);
 
-        Mail::assertNothingSent();
+        Mail::assertNothingOutgoing();
     }
 }

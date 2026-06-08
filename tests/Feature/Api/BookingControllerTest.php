@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api;
 
+use App\Mail\BookingCancelled;
+use App\Mail\BookingConfirmed;
 use App\Mail\NewBookingCreated;
 use App\Models\Booking;
 use App\Models\Room;
@@ -112,6 +114,8 @@ class BookingControllerTest extends TestCase
 
         $admin = User::factory()->create();
         $admin->assignRole('admin');
+        $director = User::factory()->create();
+        $director->assignRole('director');
 
         $user = User::factory()->create();
         $user->assignRole('guest');
@@ -129,6 +133,9 @@ class BookingControllerTest extends TestCase
             UserNotification::class,
             fn (UserNotification $notification) => $notification->title === 'Новое бронирование'
         );
+
+        // Сценарий 2: новое бронирование — только админу, не директору.
+        Notification::assertNotSentTo($director, UserNotification::class);
     }
 
     public function test_booking_fails_when_guests_exceed_room_capacity(): void
@@ -197,6 +204,48 @@ class BookingControllerTest extends TestCase
         $this->assertSame('cancelled', $booking->fresh()->status);
     }
 
+    public function test_self_cancellation_notifies_guest_admins_and_directors(): void
+    {
+        Mail::fake();
+        Notification::fake();
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+        $director = User::factory()->create();
+        $director->assignRole('director');
+        $guest = User::factory()->create();
+        $guest->assignRole('guest');
+        $booking = Booking::factory()->create(['user_id' => $guest->id, 'status' => 'confirmed']);
+
+        $this->actingAs($guest)
+            ->deleteJson("/api/bookings/{$booking->id}")
+            ->assertOk();
+
+        // Гостю — подтверждение отмены.
+        Mail::assertQueued(BookingCancelled::class, fn (BookingCancelled $mail) => $mail->hasTo($guest->email) && ! $mail->isDirector);
+        Notification::assertSentTo(
+            $guest,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Бронирование отменено'
+        );
+
+        // Администратору и директору — уведомление о самоотмене гостя.
+        Mail::assertQueued(BookingCancelled::class, fn (BookingCancelled $mail) => $mail->hasTo($admin->email) && $mail->isDirector);
+        Mail::assertQueued(BookingCancelled::class, fn (BookingCancelled $mail) => $mail->hasTo($director->email) && $mail->isDirector);
+        Mail::assertQueued(BookingCancelled::class, 3);
+
+        Notification::assertSentTo(
+            $admin,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Гость отменил бронирование'
+        );
+        Notification::assertSentTo(
+            $director,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Гость отменил бронирование'
+        );
+    }
+
     public function test_user_cannot_cancel_someone_elses_booking(): void
     {
         $user = User::factory()->create();
@@ -255,6 +304,68 @@ class BookingControllerTest extends TestCase
 
         $response->assertOk()->assertJson(['status' => 'confirmed']);
         $this->assertSame('confirmed', $booking->fresh()->status);
+    }
+
+    public function test_confirming_booking_via_api_notifies_guest(): void
+    {
+        Mail::fake();
+        Notification::fake();
+
+        $staff = User::factory()->create();
+        $staff->assignRole('admin');
+        $guest = User::factory()->create();
+        $guest->assignRole('guest');
+        $booking = Booking::factory()->create(['user_id' => $guest->id, 'status' => 'pending']);
+
+        $this->actingAs($staff)
+            ->patchJson("/api/admin/bookings/{$booking->id}/confirm")
+            ->assertOk();
+
+        Mail::assertQueued(BookingConfirmed::class, fn (BookingConfirmed $mail) => $mail->booking->is($booking)
+            && $mail->hasTo($guest->email));
+
+        Notification::assertSentTo(
+            $guest,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Бронирование подтверждено'
+        );
+    }
+
+    public function test_cancelling_booking_via_api_notifies_guest_and_directors(): void
+    {
+        Mail::fake();
+        Notification::fake();
+
+        $staff = User::factory()->create();
+        $staff->assignRole('admin');
+        $director = User::factory()->create();
+        $director->assignRole('director');
+        $guest = User::factory()->create();
+        $guest->assignRole('guest');
+        $booking = Booking::factory()->create(['user_id' => $guest->id, 'status' => 'pending']);
+
+        $this->actingAs($staff)
+            ->patchJson("/api/admin/bookings/{$booking->id}/cancel")
+            ->assertOk();
+
+        Mail::assertQueued(BookingCancelled::class, fn (BookingCancelled $mail) => $mail->booking->is($booking)
+            && $mail->hasTo($guest->email)
+            && ! $mail->isDirector);
+        Mail::assertQueued(BookingCancelled::class, fn (BookingCancelled $mail) => $mail->booking->is($booking)
+            && $mail->hasTo($director->email)
+            && $mail->isDirector);
+        Mail::assertQueued(BookingCancelled::class, 2);
+
+        Notification::assertSentTo(
+            $guest,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Бронирование отменено'
+        );
+        Notification::assertSentTo(
+            $director,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Бронирование отменено'
+        );
     }
 
     public function test_staff_can_create_booking_for_another_user(): void

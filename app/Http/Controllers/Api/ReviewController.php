@@ -10,6 +10,7 @@ use App\Models\Review;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\UserNotification;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -59,13 +60,20 @@ class ReviewController extends Controller
             ]);
         }
 
-        $review = Review::create([
-            'user_id' => $request->user()->id,
-            'booking_id' => $booking->id,
-            'rating' => $data['rating'],
-            'text' => $data['text'],
-            'status' => 'pending',
-        ]);
+        try {
+            $review = Review::create([
+                'user_id' => $request->user()->id,
+                'booking_id' => $booking->id,
+                'rating' => $data['rating'],
+                'text' => $data['text'],
+                'status' => 'pending',
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            // Подстраховка от гонки: уникальный индекс на booking_id не даст создать дубль.
+            throw ValidationException::withMessages([
+                'booking_id' => ['Отзыв на это бронирование уже оставлен.'],
+            ]);
+        }
 
         $review->load('user');
 
@@ -81,8 +89,8 @@ class ReviewController extends Controller
             url: ReviewResource::getUrl('edit', ['record' => $review]),
         );
 
-        foreach (User::role(['admin', 'director', 'developer'])->get() as $staffMember) {
-            $staffMember->notify($staffNotification);
+        foreach (User::role('admin')->get() as $admin) {
+            $admin->notify($staffNotification);
         }
 
         return response()->json([
