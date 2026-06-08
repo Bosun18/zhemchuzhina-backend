@@ -15,9 +15,9 @@ class Booking extends Model
     /** @use HasFactory<BookingFactory> */
     use HasFactory, LogsActivity;
 
-    protected $fillable = ['user_id', 'room_id', 'check_in', 'check_out', 'guests_count', 'status', 'comment', 'admin_comment'];
+    protected $fillable = ['user_id', 'room_id', 'check_in', 'check_out', 'guests_count', 'status', 'comment', 'admin_comment', 'pending_notified_at'];
 
-    protected $casts = ['check_in' => 'date', 'check_out' => 'date'];
+    protected $casts = ['check_in' => 'date', 'check_out' => 'date', 'pending_notified_at' => 'datetime'];
 
     public function getActivitylogOptions(): LogOptions
     {

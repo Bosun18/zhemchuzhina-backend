@@ -14,7 +14,9 @@ class Review extends Model
     /** @use HasFactory<ReviewFactory> */
     use HasFactory, LogsActivity;
 
-    protected $fillable = ['user_id', 'booking_id', 'rating', 'text', 'status', 'admin_comment'];
+    protected $fillable = ['user_id', 'booking_id', 'rating', 'text', 'status', 'admin_comment', 'pending_notified_at'];
+
+    protected $casts = ['pending_notified_at' => 'datetime'];
 
     public function getActivitylogOptions(): LogOptions
     {
