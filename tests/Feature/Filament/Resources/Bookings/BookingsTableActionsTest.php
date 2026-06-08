@@ -149,4 +149,50 @@ class BookingsTableActionsTest extends TestCase
             fn (UserNotification $notification) => $notification->title === 'Бронирование отменено'
         );
     }
+
+    public function test_cancel_action_saves_reason_and_sends_it_to_the_guest(): void
+    {
+        Mail::fake();
+        Notification::fake();
+
+        $admin = $this->makeAdmin();
+        $booking = $this->makeBooking('pending');
+
+        Livewire::actingAs($admin)
+            ->test(ListBookings::class)
+            ->callAction(TestAction::make('cancel')->table($booking), ['reason' => 'Нет свободных номеров на эти даты']);
+
+        $this->assertDatabaseHas('bookings', [
+            'id' => $booking->id,
+            'status' => 'cancelled',
+            'admin_comment' => 'Нет свободных номеров на эти даты',
+        ]);
+
+        $mail = new BookingCancelled($booking->fresh(['room.roomType', 'user']));
+        $this->assertStringContainsString('Нет свободных номеров на эти даты', $mail->render());
+    }
+
+    public function test_guest_notes_are_shown_only_for_website_bookings(): void
+    {
+        $admin = $this->makeAdmin();
+        $roomType = RoomType::factory()->create();
+        $room = Room::factory()->create(['room_type_id' => $roomType->id]);
+        $guest = User::factory()->create(['admin_notes' => 'Был неадекватен в прошлый раз']);
+
+        $fromWebsite = Booking::factory()->create([
+            'user_id' => $guest->id,
+            'room_id' => $room->id,
+            'source' => 'website',
+        ]);
+        $fromAdmin = Booking::factory()->create([
+            'user_id' => $guest->id,
+            'room_id' => $room->id,
+            'source' => 'admin',
+        ]);
+
+        Livewire::actingAs($admin)
+            ->test(ListBookings::class)
+            ->assertTableColumnStateSet('guest_notes', 'Был неадекватен в прошлый раз', $fromWebsite)
+            ->assertTableColumnStateSet('guest_notes', null, $fromAdmin);
+    }
 }

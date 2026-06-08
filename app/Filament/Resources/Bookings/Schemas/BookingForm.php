@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Bookings\Schemas;
 
+use App\Models\User;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class BookingForm
@@ -14,9 +16,22 @@ class BookingForm
     {
         return $schema
             ->components([
-                Select::make('user_id')
-                    ->label('Гость')
-                    ->relationship('user', 'name')
+                TextInput::make('guest_phone')
+                    ->label('Телефон гостя')
+                    ->required()
+                    ->maxLength(20)
+                    ->live(onBlur: true)
+                    ->helperText('Если номер уже есть в базе — имя и заметки подставятся автоматически.')
+                    ->afterStateUpdated(function (?string $state, Set $set): void {
+                        $user = User::findByPhone((string) $state);
+
+                        if ($user) {
+                            $set('guest_name', $user->name);
+                            $set('guest_notes', $user->admin_notes);
+                        }
+                    }),
+                TextInput::make('guest_name')
+                    ->label('Имя гостя')
                     ->required(),
                 Select::make('room_id')
                     ->label('Номер комнаты')
@@ -40,9 +55,12 @@ class BookingForm
                     ->required(),
                 Textarea::make('comment')
                     ->label('Комментарий')
+                    ->placeholder('Просьбы гостя: например, дополнительное одеяло или заказ трансфера')
                     ->columnSpanFull(),
-                Textarea::make('admin_comment')
-                    ->label('Комментарий администратора')
+                Textarea::make('guest_notes')
+                    ->label('Заметки о госте')
+                    ->placeholder('Видно только персоналу: например, испортил номер или, наоборот, постоянный гость со скидкой')
+                    ->helperText('Сохраняются в карточке гостя и видны при его следующих бронированиях. Гостю не отправляются.')
                     ->columnSpanFull(),
             ]);
     }

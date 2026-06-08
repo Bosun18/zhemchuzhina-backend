@@ -45,12 +45,6 @@
                     <td>Гостей:</td>
                     <td><strong>{{ $booking->guests_count }}</strong></td>
                 </tr>
-                @if($booking->admin_comment)
-                <tr>
-                    <td>Комментарий:</td>
-                    <td>{{ $booking->admin_comment }}</td>
-                </tr>
-                @endif
             </table>
         </div>
 

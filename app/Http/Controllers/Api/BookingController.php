@@ -60,6 +60,7 @@ class BookingController extends Controller
                 'check_out' => $data['check_out'],
                 'guests_count' => $data['guests_count'],
                 'status' => 'pending',
+                'source' => 'website',
                 'comment' => $data['comment'] ?? null,
             ]);
         });
@@ -152,6 +153,7 @@ class BookingController extends Controller
                 'check_out' => $data['check_out'],
                 'guests_count' => $data['guests_count'],
                 'status' => $data['status'] ?? 'confirmed',
+                'source' => 'admin',
                 'comment' => $data['comment'] ?? null,
                 'admin_comment' => $data['admin_comment'] ?? null,
             ]);

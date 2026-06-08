@@ -7,6 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class UsersTable
@@ -34,6 +35,11 @@ class UsersTable
                         'developer' => 'Разработчик',
                         default => $state,
                     }),
+                IconColumn::make('registered_via_phone')
+                    ->label('По телефону')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-phone')
+                    ->falseIcon('heroicon-o-minus'),
                 IconColumn::make('admin_notes')
                     ->label('Заметка')
                     ->boolean()
@@ -46,14 +52,16 @@ class UsersTable
                     ->sortable(),
             ])
             ->filters([
-                //
+                TernaryFilter::make('registered_via_phone')
+                    ->label('Создан по телефону'),
             ])
             ->recordActions([
                 EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->visible(fn (): bool => auth()->user()->hasAnyRole(['director', 'developer'])),
                 ]),
             ]);
     }

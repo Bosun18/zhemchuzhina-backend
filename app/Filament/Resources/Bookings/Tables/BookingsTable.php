@@ -6,6 +6,7 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -42,6 +43,13 @@ class BookingsTable
                         'cancelled' => 'Отменено',
                         default => $state,
                     }),
+                TextColumn::make('guest_notes')
+                    ->label('Заметки о госте')
+                    ->state(fn ($record) => $record->source === 'website' ? $record->user?->admin_notes : null)
+                    ->color('danger')
+                    ->wrap()
+                    ->placeholder('—')
+                    ->tooltip('Заметки персонала о госте — показаны для броней, оформленных гостем на сайте'),
                 TextColumn::make('created_at')
                     ->label('Создан')
                     ->dateTime()
@@ -70,12 +78,23 @@ class BookingsTable
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->visible(fn ($record) => $record->status !== 'cancelled')
-                    ->requiresConfirmation()
-                    ->action(fn ($record) => $record->update(['status' => 'cancelled'])),
+                    ->modalHeading('Отклонить бронирование')
+                    ->modalSubmitActionLabel('Отклонить')
+                    ->schema([
+                        Textarea::make('reason')
+                            ->label('Причина отказа')
+                            ->helperText('Будет отправлена гостю в письме об отмене.')
+                            ->maxLength(1000),
+                    ])
+                    ->action(fn (array $data, $record) => $record->update([
+                        'status' => 'cancelled',
+                        'admin_comment' => $data['reason'] ?? null,
+                    ])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->visible(fn (): bool => auth()->user()->hasAnyRole(['director', 'developer'])),
                 ]),
             ]);
     }
