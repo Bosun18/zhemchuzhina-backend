@@ -8,9 +8,11 @@ use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class BookingControllerTest extends TestCase
@@ -102,6 +104,31 @@ class BookingControllerTest extends TestCase
         Mail::assertQueued(NewBookingCreated::class, 2);
         Mail::assertQueued(NewBookingCreated::class, fn (NewBookingCreated $mail) => $mail->hasTo('director@example.com'));
         Mail::assertQueued(NewBookingCreated::class, fn (NewBookingCreated $mail) => $mail->hasTo('admin@example.com'));
+    }
+
+    public function test_admin_panel_users_receive_bell_notification_when_booking_is_created(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $room = $this->makeRoom(maxGuests: 3);
+
+        $this->actingAs($user)->postJson('/api/bookings', [
+            'room_id' => $room->id,
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(8)->toDateString(),
+            'guests_count' => 2,
+        ])->assertCreated();
+
+        Notification::assertSentTo(
+            $admin,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Новое бронирование'
+        );
     }
 
     public function test_booking_fails_when_guests_exceed_room_capacity(): void

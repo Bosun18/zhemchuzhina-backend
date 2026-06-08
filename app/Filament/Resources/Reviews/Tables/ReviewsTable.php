@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Reviews\Tables;
 
+use App\Filament\Resources\Reviews\ReviewResource;
 use App\Mail\ReviewApproved;
 use App\Mail\ReviewRejected;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -78,8 +80,17 @@ class ReviewsTable
                             'admin_comment' => $data['admin_comment'],
                         ]);
 
+                        $record->load('user');
+
                         Mail::to($record->user->email)
-                            ->send(new ReviewApproved($record->load('user')));
+                            ->send(new ReviewApproved($record));
+
+                        $record->user->notify(new UserNotification(
+                            title: 'Отзыв опубликован',
+                            body: 'Ваш отзыв прошёл модерацию и опубликован на сайте.',
+                            icon: 'heroicon-o-check-circle',
+                            color: 'success',
+                        ));
                     }),
 
                 Action::make('reject')
@@ -100,13 +111,30 @@ class ReviewsTable
                             'admin_comment' => $data['admin_comment'],
                         ]);
 
+                        $record->load('user');
+
                         Mail::to($record->user->email)
-                            ->send(new ReviewRejected($record->load('user')));
+                            ->send(new ReviewRejected($record));
+
+                        $record->user->notify(new UserNotification(
+                            title: 'Отзыв отклонён',
+                            body: 'Ваш отзыв не прошёл модерацию. Подробности — в письме на почту.',
+                            icon: 'heroicon-o-x-circle',
+                            color: 'danger',
+                        ));
 
                         $directors = User::role('director')->get();
                         foreach ($directors as $director) {
                             Mail::to($director->email)
                                 ->send(new ReviewRejected($record, isDirector: true));
+
+                            $director->notify(new UserNotification(
+                                title: 'Отзыв отклонён',
+                                body: "Отзыв гостя {$record->user->name} был отклонён.",
+                                icon: 'heroicon-o-x-circle',
+                                color: 'danger',
+                                url: ReviewResource::getUrl('edit', ['record' => $record]),
+                            ));
                         }
                     }),
             ])

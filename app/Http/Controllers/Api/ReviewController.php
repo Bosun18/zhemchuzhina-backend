@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Filament\Resources\Reviews\ReviewResource;
 use App\Http\Controllers\Controller;
 use App\Mail\NewReviewSubmitted;
 use App\Models\Booking;
 use App\Models\Review;
 use App\Models\Setting;
+use App\Models\User;
+use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -68,6 +71,18 @@ class ReviewController extends Controller
 
         foreach (Setting::get('notification_emails_review', []) as $email) {
             Mail::to($email)->send(new NewReviewSubmitted($review));
+        }
+
+        $staffNotification = new UserNotification(
+            title: 'Новый отзыв на модерации',
+            body: "{$review->user->name} оставил(а) отзыв с оценкой {$review->rating}/10.",
+            icon: 'heroicon-o-star',
+            color: 'warning',
+            url: ReviewResource::getUrl('edit', ['record' => $review]),
+        );
+
+        foreach (User::role(['admin', 'director', 'developer'])->get() as $staffMember) {
+            $staffMember->notify($staffNotification);
         }
 
         return response()->json([

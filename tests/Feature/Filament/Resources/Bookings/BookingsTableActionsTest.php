@@ -9,10 +9,12 @@ use App\Models\Booking;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -73,6 +75,7 @@ class BookingsTableActionsTest extends TestCase
     public function test_confirm_action_marks_booking_as_confirmed_and_sends_email(): void
     {
         Mail::fake();
+        Notification::fake();
 
         $admin = $this->makeAdmin();
         $booking = $this->makeBooking('pending');
@@ -92,11 +95,18 @@ class BookingsTableActionsTest extends TestCase
         });
 
         Mail::assertNotSent(BookingCancelled::class);
+
+        Notification::assertSentTo(
+            $booking->user,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Бронирование подтверждено'
+        );
     }
 
     public function test_cancel_action_marks_booking_as_cancelled_and_notifies_guest_and_directors(): void
     {
         Mail::fake();
+        Notification::fake();
 
         $admin = $this->makeAdmin();
         $director = User::factory()->create();
@@ -127,5 +137,16 @@ class BookingsTableActionsTest extends TestCase
         Mail::assertSent(BookingCancelled::class, 2);
 
         Mail::assertNotSent(BookingConfirmed::class);
+
+        Notification::assertSentTo(
+            $booking->user,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Бронирование отменено'
+        );
+        Notification::assertSentTo(
+            $director,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Бронирование отменено'
+        );
     }
 }

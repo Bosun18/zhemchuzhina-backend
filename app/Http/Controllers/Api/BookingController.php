@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Filament\Resources\Bookings\BookingResource;
 use App\Http\Controllers\Controller;
 use App\Mail\NewBookingCreated;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\Setting;
+use App\Models\User;
+use App\Notifications\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -67,6 +70,18 @@ class BookingController extends Controller
 
         foreach (Setting::get('notification_emails_booking', []) as $email) {
             Mail::to($email)->send(new NewBookingCreated($booking));
+        }
+
+        $staffNotification = new UserNotification(
+            title: 'Новое бронирование',
+            body: "{$booking->user->name} забронировал(а) №{$booking->room->number} на {$booking->check_in->format('d.m.Y')} — {$booking->check_out->format('d.m.Y')}.",
+            icon: 'heroicon-o-calendar-days',
+            color: 'warning',
+            url: BookingResource::getUrl('edit', ['record' => $booking]),
+        );
+
+        foreach (User::role(['admin', 'director', 'developer'])->get() as $staffMember) {
+            $staffMember->notify($staffNotification);
         }
 
         return response()->json($this->formatBooking($booking), 201);

@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Bookings\Tables;
 
+use App\Filament\Resources\Bookings\BookingResource;
 use App\Mail\BookingCancelled;
 use App\Mail\BookingConfirmed;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -70,8 +72,17 @@ class BookingsTable
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         $record->update(['status' => 'confirmed']);
+                        $record->load(['user', 'room.roomType']);
+
                         Mail::to($record->user->email)
-                            ->send(new BookingConfirmed($record->load(['user', 'room.roomType'])));
+                            ->send(new BookingConfirmed($record));
+
+                        $record->user->notify(new UserNotification(
+                            title: 'Бронирование подтверждено',
+                            body: "Ваше бронирование №{$record->room->number} на {$record->check_in->format('d.m.Y')} — {$record->check_out->format('d.m.Y')} подтверждено.",
+                            icon: 'heroicon-o-check-circle',
+                            color: 'success',
+                        ));
                     }),
                 Action::make('cancel')
                     ->label('Отменить')
@@ -87,10 +98,25 @@ class BookingsTable
                         Mail::to($record->user->email)
                             ->send(new BookingCancelled($record));
 
+                        $record->user->notify(new UserNotification(
+                            title: 'Бронирование отменено',
+                            body: "Ваше бронирование №{$record->room->number} на {$record->check_in->format('d.m.Y')} — {$record->check_out->format('d.m.Y')} отменено.",
+                            icon: 'heroicon-o-x-circle',
+                            color: 'danger',
+                        ));
+
                         $directors = User::role('director')->get();
                         foreach ($directors as $director) {
                             Mail::to($director->email)
                                 ->send(new BookingCancelled($record, isDirector: true));
+
+                            $director->notify(new UserNotification(
+                                title: 'Бронирование отменено',
+                                body: "Бронирование гостя {$record->user->name} (№{$record->room->number}) было отменено.",
+                                icon: 'heroicon-o-x-circle',
+                                color: 'danger',
+                                url: BookingResource::getUrl('edit', ['record' => $record]),
+                            ));
                         }
                     }),
             ])

@@ -7,9 +7,11 @@ use App\Models\Booking;
 use App\Models\Review;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class ReviewControllerTest extends TestCase
@@ -77,6 +79,30 @@ class ReviewControllerTest extends TestCase
 
         Mail::assertQueued(NewReviewSubmitted::class, fn (NewReviewSubmitted $mail) => $mail->hasTo('director@example.com')
             && $mail->review->booking_id === $booking->id);
+    }
+
+    public function test_admin_panel_users_receive_bell_notification_when_review_is_submitted(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $booking = Booking::factory()->create(['user_id' => $user->id, 'status' => 'confirmed']);
+
+        $this->actingAs($user)->postJson('/api/reviews', [
+            'booking_id' => $booking->id,
+            'rating' => 5,
+            'text' => 'Отличный отель, всё понравилось!',
+        ])->assertCreated();
+
+        Notification::assertSentTo(
+            $admin,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Новый отзыв на модерации'
+        );
     }
 
     public function test_user_cannot_review_someone_elses_booking(): void

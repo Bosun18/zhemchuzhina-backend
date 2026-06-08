@@ -7,9 +7,11 @@ use App\Mail\ReviewPendingTooLong;
 use App\Models\Booking;
 use App\Models\Review;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class NotifyDirectorsAboutOverduePendingTest extends TestCase
@@ -26,6 +28,7 @@ class NotifyDirectorsAboutOverduePendingTest extends TestCase
     public function test_it_notifies_directors_about_overdue_pending_bookings_and_reviews_once(): void
     {
         Mail::fake();
+        Notification::fake();
 
         $director = User::factory()->create();
         $director->assignRole('director');
@@ -66,6 +69,17 @@ class NotifyDirectorsAboutOverduePendingTest extends TestCase
                 && $mail->hasTo($director->email);
         });
         Mail::assertSent(ReviewPendingTooLong::class, 1);
+
+        Notification::assertSentTo(
+            $director,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Бронирование ожидает обработки больше суток'
+        );
+        Notification::assertSentTo(
+            $director,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Отзыв ожидает обработки больше суток'
+        );
 
         $this->assertNotNull($overdueBooking->fresh()->pending_notified_at);
         $this->assertNotNull($overdueReview->fresh()->pending_notified_at);

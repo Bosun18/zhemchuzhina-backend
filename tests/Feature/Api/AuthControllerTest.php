@@ -5,9 +5,12 @@ namespace Tests\Feature\Api;
 use App\Mail\NewUserRegistered;
 use App\Mail\Welcome;
 use App\Models\Setting;
+use App\Models\User;
+use App\Notifications\UserNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class AuthControllerTest extends TestCase
@@ -54,5 +57,50 @@ class AuthControllerTest extends TestCase
 
         Mail::assertSent(Welcome::class, fn (Welcome $mail) => $mail->hasTo('ivan@example.com')
             && $mail->user->email === 'ivan@example.com');
+    }
+
+    public function test_admin_panel_users_receive_bell_notification_when_user_registers(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $this->postJson('/api/register', [
+            'name' => 'Иван Иванов',
+            'email' => 'ivan@example.com',
+            'phone' => '+79991234567',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'city' => 'Москва',
+        ])->assertCreated();
+
+        Notification::assertSentTo(
+            $admin,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Новый пользователь зарегистрировался'
+        );
+    }
+
+    public function test_user_receives_bell_notification_after_registration(): void
+    {
+        Notification::fake();
+
+        $this->postJson('/api/register', [
+            'name' => 'Иван Иванов',
+            'email' => 'ivan@example.com',
+            'phone' => '+79991234567',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'city' => 'Москва',
+        ])->assertCreated();
+
+        $user = User::where('email', 'ivan@example.com')->firstOrFail();
+
+        Notification::assertSentTo(
+            $user,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Добро пожаловать!'
+        );
     }
 }
