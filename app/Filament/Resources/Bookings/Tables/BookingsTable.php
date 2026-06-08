@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Bookings\Tables;
 
 use App\Mail\BookingCancelled;
 use App\Mail\BookingConfirmed;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -80,8 +81,17 @@ class BookingsTable
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         $record->update(['status' => 'cancelled']);
+
+                        $record->load(['user', 'room.roomType']);
+
                         Mail::to($record->user->email)
-                            ->send(new BookingCancelled($record->load(['user', 'room.roomType'])));
+                            ->send(new BookingCancelled($record));
+
+                        $directors = User::role('director')->get();
+                        foreach ($directors as $director) {
+                            Mail::to($director->email)
+                                ->send(new BookingCancelled($record, isDirector: true));
+                        }
                     }),
             ])
             ->toolbarActions([

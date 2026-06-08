@@ -2,11 +2,14 @@
 
 namespace Tests\Feature\Api;
 
+use App\Mail\NewReviewSubmitted;
 use App\Models\Booking;
 use App\Models\Review;
+use App\Models\Setting;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ReviewControllerTest extends TestCase
@@ -55,6 +58,25 @@ class ReviewControllerTest extends TestCase
             'booking_id' => $booking->id,
             'user_id' => $user->id,
         ]);
+    }
+
+    public function test_admins_are_notified_when_review_is_submitted(): void
+    {
+        Mail::fake();
+        Setting::set('notification_emails_review', ['director@example.com']);
+
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $booking = Booking::factory()->create(['user_id' => $user->id, 'status' => 'confirmed']);
+
+        $this->actingAs($user)->postJson('/api/reviews', [
+            'booking_id' => $booking->id,
+            'rating' => 5,
+            'text' => 'Отличный отель, всё понравилось!',
+        ])->assertCreated();
+
+        Mail::assertQueued(NewReviewSubmitted::class, fn (NewReviewSubmitted $mail) => $mail->hasTo('director@example.com')
+            && $mail->review->booking_id === $booking->id);
     }
 
     public function test_user_cannot_review_someone_elses_booking(): void

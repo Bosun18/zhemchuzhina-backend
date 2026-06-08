@@ -94,11 +94,13 @@ class BookingsTableActionsTest extends TestCase
         Mail::assertNotSent(BookingCancelled::class);
     }
 
-    public function test_cancel_action_marks_booking_as_cancelled_and_sends_email(): void
+    public function test_cancel_action_marks_booking_as_cancelled_and_notifies_guest_and_directors(): void
     {
         Mail::fake();
 
         $admin = $this->makeAdmin();
+        $director = User::factory()->create();
+        $director->assignRole('director');
         $booking = $this->makeBooking('pending');
 
         Livewire::actingAs($admin)
@@ -112,8 +114,17 @@ class BookingsTableActionsTest extends TestCase
 
         Mail::assertSent(BookingCancelled::class, function (BookingCancelled $mail) use ($booking) {
             return $mail->booking->is($booking)
-                && $mail->hasTo($booking->user->email);
+                && $mail->hasTo($booking->user->email)
+                && ! $mail->isDirector;
         });
+
+        Mail::assertSent(BookingCancelled::class, function (BookingCancelled $mail) use ($booking, $director) {
+            return $mail->booking->is($booking)
+                && $mail->hasTo($director->email)
+                && $mail->isDirector;
+        });
+
+        Mail::assertSent(BookingCancelled::class, 2);
 
         Mail::assertNotSent(BookingConfirmed::class);
     }

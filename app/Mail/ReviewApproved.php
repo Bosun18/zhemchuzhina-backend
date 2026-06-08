@@ -2,33 +2,30 @@
 
 namespace App\Mail;
 
-use App\Models\Booking;
+use App\Models\Review;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class BookingCancelled extends Mailable
+class ReviewApproved extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(
-        public Booking $booking,
-        public bool $isDirector = false,
-    ) {}
+    public function __construct(public Review $review) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Бронирование отменено — Гостевой дом «Жемчужина»',
+            subject: 'Отзыв одобрен — Гостевой дом «Жемчужина»',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'emails.booking-cancelled',
+            view: 'emails.review-approved',
         );
     }
 }

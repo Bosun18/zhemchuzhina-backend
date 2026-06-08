@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewReviewSubmitted;
 use App\Models\Booking;
 use App\Models\Review;
+use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class ReviewController extends Controller
@@ -60,6 +63,12 @@ class ReviewController extends Controller
             'text' => $data['text'],
             'status' => 'pending',
         ]);
+
+        $review->load('user');
+
+        foreach (Setting::get('notification_emails_review', []) as $email) {
+            Mail::to($email)->send(new NewReviewSubmitted($review));
+        }
 
         return response()->json([
             'id' => $review->id,

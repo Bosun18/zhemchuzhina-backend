@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Reviews\Tables;
 
+use App\Mail\ReviewApproved;
 use App\Mail\ReviewRejected;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -76,6 +77,9 @@ class ReviewsTable
                             'status' => 'approved',
                             'admin_comment' => $data['admin_comment'],
                         ]);
+
+                        Mail::to($record->user->email)
+                            ->send(new ReviewApproved($record->load('user')));
                     }),
 
                 Action::make('reject')

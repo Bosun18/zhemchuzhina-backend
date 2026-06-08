@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewUserRegistered;
+use App\Mail\Welcome;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -34,6 +38,12 @@ class AuthController extends Controller
             ->performedOn($user)
             ->causedBy($user)
             ->log('Зарегистрировался');
+
+        Mail::to($user->email)->send(new Welcome($user));
+
+        foreach (Setting::get('notification_emails_registration', []) as $email) {
+            Mail::to($email)->send(new NewUserRegistered($user));
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

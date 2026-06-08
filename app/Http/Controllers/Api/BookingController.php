@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewBookingCreated;
 use App\Models\Booking;
 use App\Models\Room;
+use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class BookingController extends Controller
@@ -60,7 +63,13 @@ class BookingController extends Controller
             ->causedBy($request->user())
             ->log('Создал бронирование');
 
-        return response()->json($this->formatBooking($booking->load('room.roomType')), 201);
+        $booking->load('room.roomType', 'user');
+
+        foreach (Setting::get('notification_emails_booking', []) as $email) {
+            Mail::to($email)->send(new NewBookingCreated($booking));
+        }
+
+        return response()->json($this->formatBooking($booking), 201);
     }
 
     public function cancel(Request $request, Booking $booking)
