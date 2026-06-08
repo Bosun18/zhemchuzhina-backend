@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class RoomController extends Controller
 {
@@ -59,6 +61,47 @@ class RoomController extends Controller
         return response()->json($rooms);
     }
 
+    public function calendar(Request $request)
+    {
+        $request->validate([
+            'from' => 'required|date',
+            'to' => 'required|date|after:from|before_or_equal:'.Carbon::parse($request->input('from'))->addMonths(3)->toDateString(),
+        ]);
+
+        $from = $request->date('from');
+        $to = $request->date('to');
+
+        $rooms = Room::active()
+            ->with([
+                'roomType',
+                'bookings' => function ($query) use ($from, $to) {
+                    $query->whereIn('status', ['pending', 'confirmed'])
+                        ->where('check_in', '<', $to)
+                        ->where('check_out', '>', $from)
+                        ->orderBy('check_in');
+                },
+            ])
+            ->orderBy('number')
+            ->get()
+            ->map(fn ($room) => [
+                'id' => $room->id,
+                'number' => $room->number,
+                'floor' => $room->floor,
+                'type' => [
+                    'id' => $room->roomType->id,
+                    'name' => $room->roomType->name,
+                    'max_guests' => $room->roomType->max_guests,
+                ],
+                'bookings' => $room->bookings->map(fn (Booking $booking) => [
+                    'check_in' => $booking->check_in->toDateString(),
+                    'check_out' => $booking->check_out->toDateString(),
+                    'status' => $booking->status,
+                ])->values()->all(),
+            ]);
+
+        return response()->json($rooms);
+    }
+
     private function formatRoom(Room $room): array
     {
         return [
@@ -70,6 +113,10 @@ class RoomController extends Controller
                 'name' => $room->roomType->name,
                 'max_guests' => $room->roomType->max_guests,
                 'description' => $room->roomType->description,
+                'photos' => collect($room->roomType->photos ?? [])
+                    ->map(fn ($path) => Storage::url($path))
+                    ->values()
+                    ->all(),
             ],
         ];
     }

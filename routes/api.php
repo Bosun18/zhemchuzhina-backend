@@ -19,6 +19,7 @@ Route::post('/log-error', [FrontendLogController::class, 'store']);
 
 Route::get('/rooms', [RoomController::class, 'index']);
 Route::get('/rooms/availability', [RoomController::class, 'availability']);
+Route::get('/rooms/calendar', [RoomController::class, 'calendar']);
 Route::get('/rooms/{room}', [RoomController::class, 'show']);
 
 Route::get('/news', [NewsController::class, 'index']);

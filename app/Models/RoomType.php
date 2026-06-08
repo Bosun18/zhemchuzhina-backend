@@ -14,7 +14,9 @@ class RoomType extends Model
     /** @use HasFactory<RoomTypeFactory> */
     use HasFactory, LogsActivity;
 
-    protected $fillable = ['name', 'description', 'max_guests'];
+    protected $fillable = ['name', 'description', 'max_guests', 'photos'];
+
+    protected $casts = ['photos' => 'array'];
 
     public function getActivitylogOptions(): LogOptions
     {

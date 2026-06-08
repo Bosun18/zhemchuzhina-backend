@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RoomTypes\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -23,6 +24,14 @@ class RoomTypeForm
                     ->required()
                     ->numeric()
                     ->minValue(1),
+                FileUpload::make('photos')
+                    ->label('Фотографии')
+                    ->multiple()
+                    ->image()
+                    ->disk('public')
+                    ->directory('room-types')
+                    ->reorderable()
+                    ->columnSpanFull(),
             ]);
     }
 }

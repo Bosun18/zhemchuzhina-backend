@@ -99,15 +99,52 @@
       "id": 1,
       "name": "Стандарт",
       "max_guests": 3,
-      "description": "..."
+      "description": "...",
+      "photos": [
+        "/storage/room-types/abc.jpg",
+        "/storage/room-types/def.jpg"
+      ]
     }
   }
 ]
 ```
 
+`photos` — массив полных URL фотографий типа номера (может быть пустым).
+
 ### Карточка номера — `GET /api/rooms/{room}`
 
 Ответ `200` — объект номера в том же формате, что и в списке.
+
+### Календарь занятости — `GET /api/rooms/calendar`
+
+Все активные номера с их бронями за период. Имена гостей не раскрываются. Отменённые брони не включаются.
+
+Query-параметры:
+
+| Параметр | Правила |
+|---|---|
+| `from` | required, date |
+| `to` | required, date, позже `from`, не дальше 3 месяцев от `from` |
+
+Пример: `GET /api/rooms/calendar?from=2026-06-01&to=2026-06-30`
+
+Ответ `200`:
+```json
+[
+  {
+    "id": 1,
+    "number": 1,
+    "floor": 1,
+    "type": { "id": 1, "name": "Стандарт", "max_guests": 3 },
+    "bookings": [
+      { "check_in": "2026-06-05", "check_out": "2026-06-10", "status": "confirmed" },
+      { "check_in": "2026-06-15", "check_out": "2026-06-18", "status": "pending" }
+    ]
+  }
+]
+```
+
+`status` — только `pending` или `confirmed`.
 
 ### Доступность номеров на даты — `GET /api/rooms/availability`
 
