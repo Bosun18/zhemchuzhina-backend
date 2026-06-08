@@ -73,6 +73,13 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'frontend' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/frontend.log'),
+            'level' => 'error',
+            'days' => 14,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

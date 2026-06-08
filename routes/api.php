@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\FrontendLogController;
 use App\Http\Controllers\Api\GalleryController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\NotificationController;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 // Публичные маршруты
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/log-error', [FrontendLogController::class, 'store']);
 
 Route::get('/rooms', [RoomController::class, 'index']);
 Route::get('/rooms/availability', [RoomController::class, 'availability']);
