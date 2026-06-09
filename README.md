@@ -195,7 +195,7 @@ vendor/bin/pint
 ```
 Каталог `lang/` исключён из проверки (`pint.json`) — переводы публикуются пакетом laravel-lang и перезаписываются при `php artisan lang:update`.
 
-CI (GitHub Actions, `.github/workflows/ci.yml`) гоняет Pint и тесты на PHP 8.5 при каждом push и pull request в `main`.
+CI (GitHub Actions, `.github/workflows/ci.yml`) при каждом push и pull request в `main` проверяет на PHP 8.5: валидность composer.json/lock (`composer validate --strict`), известные уязвимости зависимостей (`composer audit`), стиль кода (Pint) и тесты.
 
 ## Тестовые данные
 
