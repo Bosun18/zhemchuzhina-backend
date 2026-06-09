@@ -1,5 +1,7 @@
 # Жемчужина — Бэкенд
 
+[![CI](https://github.com/Bosun18/zhemchuzhina-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/Bosun18/zhemchuzhina-backend/actions/workflows/ci.yml)
+
 API-сервер для сайта гостевого дома «Жемчужина» (Абхазия, Пицунда).
 Построен на Laravel 13 + Filament 5 + MySQL.
 
@@ -180,6 +182,21 @@ php artisan schedule:work
 Сейчас по расписанию выполняется:
 - `app:notify-directors-about-overdue-pending` — ежедневно в 12:00, уведомляет директора по почте о бронированиях и отзывах, которые более суток находятся в статусе «ожидает»
 
+## Тесты и качество кода
+
+Тесты используют sqlite в памяти (настроено в `phpunit.xml`), отдельная база не нужна:
+```bash
+php artisan test
+```
+
+Проверка стиля кода (Laravel Pint):
+```bash
+vendor/bin/pint
+```
+Каталог `lang/` исключён из проверки (`pint.json`) — переводы публикуются пакетом laravel-lang и перезаписываются при `php artisan lang:update`.
+
+CI (GitHub Actions, `.github/workflows/ci.yml`) гоняет Pint и тесты на PHP 8.5 при каждом push и pull request в `main`.
+
 ## Тестовые данные
 
 Для заполнения БД тестовыми данными (только для разработки):
@@ -212,7 +229,11 @@ database/
 ├── seeders/              — сидеры
 ├── factories/            — фабрики для тестов
 routes/
-└── api.php               — API маршруты
+├── api.php               — API маршруты
+tests/
+├── Feature/              — функциональные тесты (API, админ-панель)
+.github/
+└── workflows/ci.yml      — CI: Pint + тесты
 
 ## Лицензия
 
