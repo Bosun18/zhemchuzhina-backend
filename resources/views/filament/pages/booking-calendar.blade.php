@@ -31,8 +31,9 @@
                     @foreach ($days as $day)
                         <th
                             @class([
-                                'min-w-[2.5rem] px-1.5 py-2 text-center font-medium text-gray-600 dark:text-gray-300',
+                                'min-w-[2.5rem] border-l border-gray-950/10 px-1.5 py-2 text-center font-medium text-gray-600 dark:border-white/10 dark:text-gray-300',
                                 'bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400' => $day->isToday(),
+                                'bg-gray-100 dark:bg-white/10' => ! $day->isToday() && $day->isWeekend(),
                             ])
                         >
                             <div>{{ $day->format('d') }}</div>
@@ -77,7 +78,7 @@
                                         .$booking->check_in->format('d.m').'–'.$booking->check_out->format('d.m')
                                         .' · '.$nights.' '.$nightsWord.' · '.$statusLabel;
                                 @endphp
-                                <td colspan="{{ $cell['span'] }}" class="border-t border-gray-100 p-0.5 align-middle dark:border-white/5">
+                                <td colspan="{{ $cell['span'] }}" class="border-t border-l border-gray-950/10 p-0.5 align-middle dark:border-white/10">
                                     <a
                                         href="{{ \App\Filament\Resources\Bookings\BookingResource::getUrl('edit', ['record' => $booking->id]) }}"
                                         title="{{ $tooltip }}"
@@ -88,9 +89,22 @@
                                     </a>
                                 </td>
                             @elseif ($cell['type'] === 'past')
-                                <td class="h-10 border-t border-gray-100 bg-gray-200 dark:border-white/5 dark:bg-gray-700"></td>
+                                <td
+                                    @class([
+                                        'h-10 border-t border-l border-gray-950/10 dark:border-white/10',
+                                        'bg-primary-100/60 dark:bg-primary-500/15' => $day->isToday(),
+                                        'bg-gray-200 dark:bg-gray-700' => ! $day->isToday(),
+                                    ])
+                                ></td>
                             @else
-                                <td class="h-10 border-t border-gray-100 bg-emerald-50 dark:border-white/5 dark:bg-emerald-950/40"></td>
+                                <td
+                                    @class([
+                                        'h-10 border-t border-l border-gray-950/10 dark:border-white/10',
+                                        'bg-primary-50 dark:bg-primary-500/10' => $day->isToday(),
+                                        'bg-emerald-100/70 dark:bg-emerald-900/50' => ! $day->isToday() && $day->isWeekend(),
+                                        'bg-emerald-50 dark:bg-emerald-950/40' => ! $day->isToday() && ! $day->isWeekend(),
+                                    ])
+                                ></td>
                             @endif
                         @endforeach
                     </tr>

@@ -6,17 +6,12 @@
 - Удалить всё содержимое run() кроме вызова RolesAndPermissionsSeeder
 - Оставить только: $this->call(RolesAndPermissionsSeeder::class);
 
-### database/factories/ — удалить все фабрики кроме UserFactory:
-- BookingFactory.php
-- GalleryFactory.php
-- NewsFactory.php
+### database/factories/ — можно удалить только фабрики, не используемые тестами:
 - PriceFactory.php
-- ReviewFactory.php
-- RoomFactory.php
-- RoomTypeFactory.php
 - SeasonFactory.php
-- ServiceFactory.php
 - SettingFactory.php
+
+⚠️ Остальные фабрики (Booking, Gallery, News, Review, Room, RoomType, Service, User) используются в тестах — их удаление сломает `php artisan test`. Фабрики не попадают в продакшен-данные, поэтому безопаснее оставить все.
 
 ## Тестовые данные в БД (залиты через migrate:fresh --seed)
 
@@ -50,5 +45,5 @@
 ## Что ОСТАВИТЬ при чистке
 - Реальные типы номеров, комнаты, сезоны и цены — создать заново вручную через админку
 - RolesAndPermissionsSeeder — оставить
-- UserFactory — оставить (используется в тестах)
+- Фабрики, используемые тестами (Booking, Gallery, News, Review, Room, RoomType, Service, User) — оставить
 - Реального пользователя developer (beliy-81@mail.ru) — оставить
