@@ -39,6 +39,7 @@
     "guests_count": 2,
     "status": "pending",
     "comment": "Поздний заезд",
+    "review": { "id": 1, "status": "pending", "rating": 5, "text": "Отличный отель!" },
     "room": {
       "id": 1,
       "number": 1,
@@ -55,6 +56,10 @@
 ```
 
 Возможные значения `status`: `pending`, `confirmed`, `cancelled`.
+
+`review` — отзыв гостя на это бронирование (`id`, статус модерации,
+оценка, текст) или `null`, если отзыва нет. Тот же формат — в ответах
+подтверждения, отмены и ручного создания брони ниже.
 
 ### Подтвердить бронирование — `PATCH /api/admin/bookings/{booking}/confirm`
 
