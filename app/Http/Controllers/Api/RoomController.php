@@ -43,8 +43,8 @@ class RoomController extends Controller
         $busyRoomIds = Booking::whereNotIn('status', ['cancelled'])
             ->where(function ($query) use ($checkIn, $checkOut) {
                 $query->where(function ($q) use ($checkIn, $checkOut) {
-                    $q->where('check_in', '<', $checkOut)
-                        ->where('check_out', '>', $checkIn);
+                    $q->whereDate('check_in', '<', $checkOut)
+                        ->whereDate('check_out', '>', $checkIn);
                 });
             })
             ->pluck('room_id');
@@ -76,8 +76,8 @@ class RoomController extends Controller
                 'roomType',
                 'bookings' => function ($query) use ($from, $to) {
                     $query->whereIn('status', ['pending', 'confirmed'])
-                        ->where('check_in', '<', $to)
-                        ->where('check_out', '>', $from)
+                        ->whereDate('check_in', '<', $to)
+                        ->whereDate('check_out', '>', $from)
                         ->orderBy('check_in');
                 },
             ])

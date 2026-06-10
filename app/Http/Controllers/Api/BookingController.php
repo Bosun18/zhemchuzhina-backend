@@ -167,6 +167,9 @@ class BookingController extends Controller
 
     /**
      * Проверяет пересечение с активными бронями номера на указанные даты.
+     * Бронь занимает полуинтервал ночей [check_in, check_out), поэтому
+     * сравнение строго по датам (whereDate): стык «выезд = чужой заезд»
+     * валиден независимо от драйвера БД и времени в хранимых значениях.
      * При $lock = true берёт блокировку строк (внутри транзакции),
      * чтобы исключить гонку при одновременном бронировании одного номера.
      */
@@ -174,8 +177,8 @@ class BookingController extends Controller
     {
         $query = Booking::where('room_id', $roomId)
             ->where('status', '!=', 'cancelled')
-            ->where('check_in', '<', $checkOut)
-            ->where('check_out', '>', $checkIn);
+            ->whereDate('check_in', '<', $checkOut)
+            ->whereDate('check_out', '>', $checkIn);
 
         if ($lock) {
             $query->lockForUpdate();

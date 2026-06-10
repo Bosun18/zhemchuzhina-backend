@@ -177,6 +177,132 @@ class BookingControllerTest extends TestCase
         $response->assertStatus(422)->assertJsonValidationErrors('room_id');
     }
 
+    public function test_back_to_back_booking_starting_on_existing_checkout_is_allowed(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $room = $this->makeRoom();
+
+        Booking::factory()->create([
+            'room_id' => $room->id,
+            'status' => 'confirmed',
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/api/bookings', [
+            'room_id' => $room->id,
+            'check_in' => now()->addDays(10)->toDateString(),
+            'check_out' => now()->addDays(12)->toDateString(),
+            'guests_count' => 1,
+        ]);
+
+        $response->assertCreated()->assertJson([
+            'check_in' => now()->addDays(10)->toDateString(),
+            'check_out' => now()->addDays(12)->toDateString(),
+        ]);
+    }
+
+    public function test_back_to_back_booking_ending_on_existing_checkin_is_allowed(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $room = $this->makeRoom();
+
+        Booking::factory()->create([
+            'room_id' => $room->id,
+            'status' => 'confirmed',
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/api/bookings', [
+            'room_id' => $room->id,
+            'check_in' => now()->addDay()->toDateString(),
+            'check_out' => now()->addDays(5)->toDateString(),
+            'guests_count' => 1,
+        ]);
+
+        $response->assertCreated()->assertJson([
+            'check_in' => now()->addDay()->toDateString(),
+            'check_out' => now()->addDays(5)->toDateString(),
+        ]);
+    }
+
+    public function test_booking_fails_on_single_night_overlap(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $room = $this->makeRoom();
+
+        Booking::factory()->create([
+            'room_id' => $room->id,
+            'status' => 'confirmed',
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/api/bookings', [
+            'room_id' => $room->id,
+            'check_in' => now()->addDays(9)->toDateString(),
+            'check_out' => now()->addDays(11)->toDateString(),
+            'guests_count' => 1,
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors('room_id');
+    }
+
+    public function test_booking_fails_on_identical_dates(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $room = $this->makeRoom();
+
+        Booking::factory()->create([
+            'room_id' => $room->id,
+            'status' => 'confirmed',
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/api/bookings', [
+            'room_id' => $room->id,
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+            'guests_count' => 1,
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors('room_id');
+    }
+
+    public function test_cancelled_booking_does_not_block_dates(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $room = $this->makeRoom();
+
+        Booking::factory()->create([
+            'room_id' => $room->id,
+            'status' => 'cancelled',
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($user)->postJson('/api/bookings', [
+            'room_id' => $room->id,
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+            'guests_count' => 1,
+        ]);
+
+        $response->assertCreated();
+        $this->assertDatabaseHas('bookings', [
+            'user_id' => $user->id,
+            'room_id' => $room->id,
+            'status' => 'pending',
+        ]);
+    }
+
     public function test_booking_validates_input(): void
     {
         $user = User::factory()->create();
@@ -416,6 +542,59 @@ class BookingControllerTest extends TestCase
             'room_id' => $room->id,
             'check_in' => now()->addDays(6)->toDateString(),
             'check_out' => now()->addDays(9)->toDateString(),
+            'guests_count' => 1,
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors('room_id');
+    }
+
+    public function test_admin_back_to_back_booking_starting_on_existing_checkout_is_allowed(): void
+    {
+        $staff = User::factory()->create();
+        $staff->assignRole('admin');
+        $guest = User::factory()->create();
+        $room = $this->makeRoom();
+
+        Booking::factory()->create([
+            'room_id' => $room->id,
+            'status' => 'confirmed',
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($staff)->postJson('/api/admin/bookings', [
+            'user_id' => $guest->id,
+            'room_id' => $room->id,
+            'check_in' => now()->addDays(10)->toDateString(),
+            'check_out' => now()->addDays(12)->toDateString(),
+            'guests_count' => 1,
+        ]);
+
+        $response->assertCreated()->assertJson([
+            'check_in' => now()->addDays(10)->toDateString(),
+            'check_out' => now()->addDays(12)->toDateString(),
+        ]);
+    }
+
+    public function test_admin_booking_fails_on_single_night_overlap(): void
+    {
+        $staff = User::factory()->create();
+        $staff->assignRole('admin');
+        $guest = User::factory()->create();
+        $room = $this->makeRoom();
+
+        Booking::factory()->create([
+            'room_id' => $room->id,
+            'status' => 'confirmed',
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($staff)->postJson('/api/admin/bookings', [
+            'user_id' => $guest->id,
+            'room_id' => $room->id,
+            'check_in' => now()->addDays(9)->toDateString(),
+            'check_out' => now()->addDays(11)->toDateString(),
             'guests_count' => 1,
         ]);
 

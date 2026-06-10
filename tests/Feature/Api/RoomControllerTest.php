@@ -103,6 +103,46 @@ class RoomControllerTest extends TestCase
             ->assertJsonValidationErrors('to');
     }
 
+    public function test_availability_marks_room_available_for_back_to_back_dates(): void
+    {
+        $room = $this->makeRoom();
+
+        Booking::factory()->create([
+            'room_id' => $room->id,
+            'status' => 'confirmed',
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $checkIn = now()->addDays(10)->toDateString();
+        $checkOut = now()->addDays(12)->toDateString();
+
+        $this->getJson("/api/rooms/availability?check_in={$checkIn}&check_out={$checkOut}")
+            ->assertOk()
+            ->assertJsonPath('0.id', $room->id)
+            ->assertJsonPath('0.is_available', true);
+    }
+
+    public function test_availability_marks_room_unavailable_on_single_night_overlap(): void
+    {
+        $room = $this->makeRoom();
+
+        Booking::factory()->create([
+            'room_id' => $room->id,
+            'status' => 'confirmed',
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(10)->toDateString(),
+        ]);
+
+        $checkIn = now()->addDays(9)->toDateString();
+        $checkOut = now()->addDays(11)->toDateString();
+
+        $this->getJson("/api/rooms/availability?check_in={$checkIn}&check_out={$checkOut}")
+            ->assertOk()
+            ->assertJsonPath('0.id', $room->id)
+            ->assertJsonPath('0.is_available', false);
+    }
+
     public function test_room_payload_includes_room_type_photo_urls(): void
     {
         $roomType = RoomType::factory()->create([
