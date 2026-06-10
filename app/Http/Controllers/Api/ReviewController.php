@@ -100,4 +100,53 @@ class ReviewController extends Controller
             'status' => $review->status,
         ], 201);
     }
+
+    public function update(Request $request, Review $review)
+    {
+        if ($review->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'rating' => 'required|integer|min:1|max:10',
+            'text' => 'required|string|max:2000',
+        ]);
+
+        $review->update([
+            'rating' => $data['rating'],
+            'text' => $data['text'],
+            'status' => 'pending',
+            'admin_comment' => null,
+        ]);
+
+        activity()->useLog('user')
+            ->performedOn($review)
+            ->causedBy($request->user())
+            ->log('Изменил отзыв');
+
+        $review->load('user');
+
+        foreach (Setting::get('notification_emails_review', []) as $email) {
+            Mail::to($email)->send(new NewReviewSubmitted($review));
+        }
+
+        $staffNotification = new UserNotification(
+            title: 'Отзыв изменён и ожидает повторной модерации',
+            body: "{$review->user->name} изменил(а) отзыв, новая оценка {$review->rating}/10.",
+            icon: 'heroicon-o-star',
+            color: 'warning',
+            url: ReviewResource::getUrl('edit', ['record' => $review]),
+        );
+
+        foreach (User::role('admin')->get() as $admin) {
+            $admin->notify($staffNotification);
+        }
+
+        return response()->json([
+            'id' => $review->id,
+            'rating' => $review->rating,
+            'text' => $review->text,
+            'status' => $review->status,
+        ]);
+    }
 }

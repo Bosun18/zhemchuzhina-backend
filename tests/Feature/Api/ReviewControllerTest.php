@@ -180,4 +180,120 @@ class ReviewControllerTest extends TestCase
 
         $response->assertStatus(422)->assertJsonValidationErrors(['booking_id', 'rating', 'text']);
     }
+
+    public function test_owner_can_update_own_review(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $review = Review::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'approved',
+            'admin_comment' => 'Спасибо за отзыв!',
+        ]);
+
+        $response = $this->actingAs($user)->patchJson("/api/reviews/{$review->id}", [
+            'rating' => 8,
+            'text' => 'Обновлённый текст отзыва.',
+        ]);
+
+        $response->assertOk()->assertJson([
+            'id' => $review->id,
+            'rating' => 8,
+            'text' => 'Обновлённый текст отзыва.',
+            'status' => 'pending',
+        ]);
+
+        $this->assertDatabaseHas('reviews', [
+            'id' => $review->id,
+            'rating' => 8,
+            'text' => 'Обновлённый текст отзыва.',
+            'status' => 'pending',
+            'admin_comment' => null,
+        ]);
+    }
+
+    public function test_updated_approved_review_disappears_from_public_feed(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $review = Review::factory()->create(['user_id' => $user->id, 'status' => 'approved']);
+
+        $this->getJson('/api/reviews')->assertOk()->assertJsonCount(1);
+
+        $this->actingAs($user)->patchJson("/api/reviews/{$review->id}", [
+            'rating' => 7,
+            'text' => 'Передумал, дополняю отзыв.',
+        ])->assertOk();
+
+        $this->getJson('/api/reviews')->assertOk()->assertJsonCount(0);
+    }
+
+    public function test_user_cannot_update_someone_elses_review(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $review = Review::factory()->create(['status' => 'pending']);
+
+        $response = $this->actingAs($user)->patchJson("/api/reviews/{$review->id}", [
+            'rating' => 1,
+            'text' => 'Попытка изменить чужой отзыв.',
+        ]);
+
+        $response->assertStatus(403);
+        $this->assertNotSame('Попытка изменить чужой отзыв.', $review->fresh()->text);
+    }
+
+    public function test_guest_cannot_update_review(): void
+    {
+        $review = Review::factory()->create();
+
+        $response = $this->patchJson("/api/reviews/{$review->id}", [
+            'rating' => 5,
+            'text' => 'Неавторизованная попытка.',
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    public function test_update_validates_input(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $review = Review::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->patchJson("/api/reviews/{$review->id}", [
+            'rating' => 11,
+            'text' => '',
+        ]);
+
+        $response->assertStatus(422)->assertJsonValidationErrors(['rating', 'text']);
+    }
+
+    public function test_staff_are_notified_when_review_is_updated(): void
+    {
+        Mail::fake();
+        Notification::fake();
+        Setting::set('notification_emails_review', ['director@example.com']);
+
+        $admin = User::factory()->create();
+        $admin->assignRole('admin');
+
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $review = Review::factory()->create(['user_id' => $user->id, 'status' => 'approved']);
+
+        $this->actingAs($user)->patchJson("/api/reviews/{$review->id}", [
+            'rating' => 9,
+            'text' => 'Обновлённый текст отзыва.',
+        ])->assertOk();
+
+        Mail::assertQueued(NewReviewSubmitted::class, fn (NewReviewSubmitted $mail) => $mail->hasTo('director@example.com')
+            && $mail->review->is($review));
+
+        Notification::assertSentTo(
+            $admin,
+            UserNotification::class,
+            fn (UserNotification $notification) => $notification->title === 'Отзыв изменён и ожидает повторной модерации'
+        );
+    }
 }

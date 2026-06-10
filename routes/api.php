@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/bookings/{booking}', [BookingController::class, 'cancel']);
 
     Route::post('/reviews', [ReviewController::class, 'store']);
+    Route::patch('/reviews/{review}', [ReviewController::class, 'update']);
 });
 
 // Только для персонала (admin, director, developer)

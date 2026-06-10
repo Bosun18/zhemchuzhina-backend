@@ -86,7 +86,9 @@ class BookingControllerTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('0.review.id', $review->id)
-            ->assertJsonPath('0.review.status', 'pending');
+            ->assertJsonPath('0.review.status', 'pending')
+            ->assertJsonPath('0.review.rating', $review->rating)
+            ->assertJsonPath('0.review.text', $review->text);
     }
 
     public function test_user_can_create_booking(): void

@@ -199,6 +199,8 @@ class BookingController extends Controller
             'review' => $booking->review ? [
                 'id' => $booking->review->id,
                 'status' => $booking->review->status,
+                'rating' => $booking->review->rating,
+                'text' => $booking->review->text,
             ] : null,
             'room' => [
                 'id' => $booking->room->id,
