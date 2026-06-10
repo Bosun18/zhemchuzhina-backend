@@ -20,7 +20,7 @@ class BookingController extends Controller
     public function myBookings(Request $request)
     {
         $bookings = $request->user()->bookings()
-            ->with('room.roomType')
+            ->with(['room.roomType', 'review'])
             ->latest()
             ->get()
             ->map(fn (Booking $booking) => $this->formatBooking($booking));
@@ -111,7 +111,7 @@ class BookingController extends Controller
 
     public function index()
     {
-        $bookings = Booking::with(['user:id,name,email', 'room.roomType'])
+        $bookings = Booking::with(['user:id,name,email', 'room.roomType', 'review'])
             ->latest()
             ->get()
             ->map(fn (Booking $booking) => $this->formatBooking($booking, forStaff: true));
@@ -196,6 +196,10 @@ class BookingController extends Controller
             'guests_count' => $booking->guests_count,
             'status' => $booking->status,
             'comment' => $booking->comment,
+            'review' => $booking->review ? [
+                'id' => $booking->review->id,
+                'status' => $booking->review->status,
+            ] : null,
             'room' => [
                 'id' => $booking->room->id,
                 'number' => $booking->room->number,

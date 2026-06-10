@@ -6,6 +6,7 @@ use App\Mail\BookingCancelled;
 use App\Mail\BookingConfirmed;
 use App\Mail\NewBookingCreated;
 use App\Models\Booking;
+use App\Models\Review;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\Setting;
@@ -55,6 +56,37 @@ class BookingControllerTest extends TestCase
         $response->assertOk();
         $response->assertJsonCount(1);
         $this->assertSame($booking->id, $response->json('0.id'));
+    }
+
+    public function test_my_bookings_return_null_review_when_no_review_exists(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $room = $this->makeRoom();
+        Booking::factory()->create(['user_id' => $user->id, 'room_id' => $room->id]);
+
+        $response = $this->actingAs($user)->getJson('/api/my-bookings');
+
+        $response->assertOk()->assertJsonPath('0.review', null);
+    }
+
+    public function test_my_bookings_return_review_id_and_moderation_status(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('guest');
+        $room = $this->makeRoom();
+        $booking = Booking::factory()->create(['user_id' => $user->id, 'room_id' => $room->id]);
+        $review = Review::factory()->create([
+            'user_id' => $user->id,
+            'booking_id' => $booking->id,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($user)->getJson('/api/my-bookings');
+
+        $response->assertOk()
+            ->assertJsonPath('0.review.id', $review->id)
+            ->assertJsonPath('0.review.status', 'pending');
     }
 
     public function test_user_can_create_booking(): void
