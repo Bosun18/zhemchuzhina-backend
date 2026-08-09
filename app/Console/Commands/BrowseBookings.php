@@ -48,7 +48,6 @@ class BrowseBookings extends Command
         );
 
         $table
-            ->setEmptyText('Броней нет')
             ->setNoMatchText('Ничего не найдено')
             ->expandVertically(true);
 
