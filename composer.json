@@ -16,7 +16,7 @@
         "spatie/laravel-permission": "^8.0"
     },
     "require-dev": {
-        "bosun18/tui-datatable": "^0.1.0",
+        "bosun18/tui-datatable": "^0.2.0",
         "fakerphp/faker": "^1.23",
         "laravel/boost": "^2.2",
         "laravel/pail": "^1.2.5",

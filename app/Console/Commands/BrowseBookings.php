@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\Booking;
 use Bosun18\TuiDataTable\Align;
 use Bosun18\TuiDataTable\Column;
-use Bosun18\TuiDataTable\Event\FilterChangeEvent;
 use Bosun18\TuiDataTable\SortDirection;
 use Bosun18\TuiDataTable\TableWidget;
 use Illuminate\Console\Attributes\Description;
@@ -32,8 +31,6 @@ class BrowseBookings extends Command
 
     private const string FILTER_KEY = 'f';
 
-    private const int VISIBLE_ROWS = 15;
-
     public function handle(): int
     {
         $rows = $this->rows();
@@ -47,9 +44,13 @@ class BrowseBookings extends Command
         $table = new TableWidget(
             columns: $this->columns(),
             rows: $rows,
-            maxVisible: self::VISIBLE_ROWS,
             keybindings: new Keybindings(['cancel' => [Key::ESCAPE, 'ctrl+c', 'q']]),
         );
+
+        $table
+            ->setEmptyText('Броней нет')
+            ->setNoMatchText('Ничего не найдено')
+            ->expandVertically(true);
 
         $statusLine = new TextWidget;
         $filterInput = new InputWidget()->setPrompt('  Фильтр: ');
@@ -59,12 +60,11 @@ class BrowseBookings extends Command
         $tui->addStyleSheet(TableWidget::defaultStyleSheet());
 
         $total = \count($rows);
-        $matches = $total;
 
-        $refreshStatusLine = function () use ($statusLine, $table, &$matches, $total): void {
+        $refreshStatusLine = function () use ($statusLine, $table, $total): void {
             $statusLine->setText(\sprintf(
                 '  Броней: %d из %d · сортировка: %s',
-                $matches,
+                $table->getVisibleRowCount(),
                 $total,
                 $this->describeSort($table),
             ));
@@ -72,10 +72,7 @@ class BrowseBookings extends Command
 
         $table
             ->onSortChange($refreshStatusLine)
-            ->onFilterChange(function (FilterChangeEvent $event) use (&$matches, $refreshStatusLine): void {
-                $matches = $event->matchCount;
-                $refreshStatusLine();
-            })
+            ->onFilterChange($refreshStatusLine)
             ->onCancel(static fn () => $tui->stop())
             ->onInput(static function (string $data) use ($tui, $filterInput): bool {
                 if ($data !== self::FILTER_KEY) {
@@ -99,7 +96,6 @@ class BrowseBookings extends Command
             });
 
         $table->sortBy('check_in', SortDirection::Desc);
-        $refreshStatusLine();
 
         $tui->add($statusLine)->add($table)->add($filterInput)->add($hints);
         $tui->setFocus($table);
@@ -164,7 +160,7 @@ class BrowseBookings extends Command
 
         $headers = [];
 
-        foreach ($this->columns() as $column) {
+        foreach ($table->getColumns() as $column) {
             $headers[$column->key] = $column->header;
         }
 

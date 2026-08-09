@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6fae35f2a58be9b35a9178835ceb4ade",
+    "content-hash": "cbf8ad9684f63f593bf1b4192563ca4e",
     "packages": [
         {
             "name": "archtechx/enums",
@@ -10236,16 +10236,16 @@
     "packages-dev": [
         {
             "name": "bosun18/tui-datatable",
-            "version": "v0.1.0",
+            "version": "v0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Bosun18/tui-datatable.git",
-                "reference": "933474b3cc8979067dd4b974e5d9a912251ddf8e"
+                "reference": "31c3d7f0a31afedf9bdaf00adde670ea1b619a3c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Bosun18/tui-datatable/zipball/933474b3cc8979067dd4b974e5d9a912251ddf8e",
-                "reference": "933474b3cc8979067dd4b974e5d9a912251ddf8e",
+                "url": "https://api.github.com/repos/Bosun18/tui-datatable/zipball/31c3d7f0a31afedf9bdaf00adde670ea1b619a3c",
+                "reference": "31c3d7f0a31afedf9bdaf00adde670ea1b619a3c",
                 "shasum": ""
             },
             "require": {
@@ -10278,9 +10278,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Bosun18/tui-datatable/issues",
-                "source": "https://github.com/Bosun18/tui-datatable/tree/v0.1.0"
+                "source": "https://github.com/Bosun18/tui-datatable/tree/v0.2.0"
             },
-            "time": "2026-08-09T09:02:52+00:00"
+            "time": "2026-08-09T11:57:37+00:00"
         },
         {
             "name": "fakerphp/faker",
